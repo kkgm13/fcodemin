@@ -15,23 +15,28 @@ type Storage () =
     // Adder
     member __.AddMeeting (meet : Meeting) =
         // Check for multiple
-        if Meeting.isValid meet.Title then
+        if Meeting.isValid meet then
             meetings.Add meet
             Ok()
-        else Error "Invalid todo"
+        else Error "Invalid Meeting"
 
 
 // Faking Data
 let storage = Storage()
-storage.AddMeeting(Meeting.create "Event 1" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+storage.AddMeeting(Meeting.create "Event 1" (DateTime(2021,05,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
 storage.AddMeeting(Meeting.create "Event 2" (DateTime(2021,04,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
-storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,04,30,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,04,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+// This should be illegal
+storage.AddMeeting(Meeting.create "Event Negative" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
+
+// let loadMeeting meeting next ctx = task {
+//     let meet = {Title = meeting}
+//     return! json meet next ctx
+// }
 
 let meetApi = 
     {
-        getMeetings = fun() -> async {
-            return storage.GetMeetings()
-        }
+        getMeetings = fun() -> storage.GetMeetings()
         addMeeting = 
         fun meet -> async {
             match storage.AddMeeting meet with
@@ -43,7 +48,9 @@ let meetApi =
 let webApp =
     router {
         get Route.hello (json "Hello World")
-        get "/meetings/" (json meetApi) // Send everything???
+        // get "/meetings/" (json (storage.GetMeetings())) 
+        get Route.meeting (json (meetApi.getMeetings()))// Send everything???
+        // getf "/api/meeting/%i" loadMeeting
     }
 
 

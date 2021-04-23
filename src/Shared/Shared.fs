@@ -16,18 +16,19 @@ type Meeting = {
 
 module Meeting = 
     // Validator Method
-    let isValid title  =
+    let isValid meet  = (
         // If null or whitespace only
-        String.IsNullOrWhiteSpace title |> not
-        // ,DateTime.Compare(start,DateTime.Now) > 0
+        String.IsNullOrWhiteSpace meet.Title ||
+        // If The date and time compared is anything greater than the 
+        DateTime.Compare(meet.Start,DateTime.Now) < 0) |> not
+        
     // Add/Create method
     let create title start duration= 
         {
             Id = Guid.NewGuid()
             Title = title
-            // Variable to pass???
-            Start = DateTime(2021,04,18,10,0,0)
-            Duration = TimeSpan.FromHours(3.0)
+            Start = start
+            Duration = duration
         }
     // Conflict Checker
     // let conflict m1 m2 = 
@@ -41,14 +42,11 @@ module Meeting =
 
 module Route =
     let hello = "/api/hello"
-    let test = "/api/test"
+    let meeting = "/api/meetings"
     // let builder typeName methodName =
     //     sprintf "/api/%s/%s" typeName methodName
 
 type IMeetingsApi =
-    { getMeetings : unit -> Async<Meeting list>
+    { getMeetings : unit -> Meeting list 
+        // async can throw an issue based on the Middleware implementaion
       addMeeting : Meeting -> Async<Meeting> }
-
-
-
-
