@@ -11,6 +11,7 @@ type Model =
         Hello: string
         Meetings: Meeting list
         // Input: string
+        // Errors: string list // Server Error Handler
     }
 
 type Msg =
@@ -27,14 +28,15 @@ let init() =
             Hello = "Test" 
             // Input = "" // Needs Input 
             Meetings = []
+            // Errors = []
         }
     // Get actual data
     let getHello() = Fetch.get<unit, string> Route.hello
     let getMeetings() = Fetch.get<unit, Meeting> Route.test
     let cmd1 = Cmd.OfPromise.perform getHello () GotHello
-    // let cmd2 = Cmd.OfAsync.perform meetApi.addMeeting getMeetings () GotMeetings
-    let cmd2 = Cmd.OfPromise.perform getMeetings () GotMeetings
-    model, cmd1, cmd2
+    // let cmd2 = Cmd.OfAsync.either getMeetings () GotMeetings GotError
+    // let cmd2 = Cmd.OfPromise.perform getMeetings () GotMeetings
+    model, cmd1
 
 //Updating the Model for the view
 let update msg model =
@@ -47,6 +49,8 @@ let update msg model =
     //     let meet = Meeting.create 
     | AddedMeet meet ->
         { model with Meetings = model.Meetings @ [ meet ]}, Cmd.none
+    // | GotError ex ->
+    //     {model with Errors = ex.Message :: model.Errors}, Cmd.none
 
 // Set up the React Portion of HTML
 open Fable.React

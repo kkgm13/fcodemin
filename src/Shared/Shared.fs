@@ -6,8 +6,8 @@ open System
 type Meeting = {
     Id : Guid
     Title : string
-    // Start : DateTime
-    // Duration : TimeSpan
+    Start : DateTime
+    Duration : TimeSpan
 }
 
 // type Schedule =
@@ -21,13 +21,13 @@ module Meeting =
         String.IsNullOrWhiteSpace title |> not
         // ,DateTime.Compare(start,DateTime.Now) > 0
     // Add/Create method
-    let create title = 
+    let create title start duration= 
         {
             Id = Guid.NewGuid()
             Title = title
             // Variable to pass???
-            // Start = DateTime(2021,04,18,10,0,0)
-            // Duration = TimeSpan.FromHours(3.0)
+            Start = DateTime(2021,04,18,10,0,0)
+            Duration = TimeSpan.FromHours(3.0)
         }
     // Conflict Checker
     // let conflict m1 m2 = 

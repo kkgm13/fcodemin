@@ -23,12 +23,9 @@ type Storage () =
 
 // Faking Data
 let storage = Storage()
-
-storage.AddMeeting(Meeting.create "Event 1"
-// (DateTime(2021,04,16,15,0,0)) 
-// (TimeSpan.FromHours(1.0))
-) |> ignore
-
+storage.AddMeeting(Meeting.create "Event 1" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+storage.AddMeeting(Meeting.create "Event 2" (DateTime(2021,04,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,04,30,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
 
 let meetApi = 
     {
@@ -46,7 +43,7 @@ let meetApi =
 let webApp =
     router {
         get Route.hello (json "Hello World")
-        get Route.test (json meetApi)
+        get "/meetings/" (json meetApi) // Send everything???
     }
 
 
