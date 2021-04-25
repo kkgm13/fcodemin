@@ -16,7 +16,7 @@ type Model =
 
 type Msg =
     | GotHello of string
-    | GotMeetings of  list
+    | GotMeetings of Meeting list
     // | AddMeet
     | AddedMeet of Meeting
     | GotError of exn // Server Error Handler
