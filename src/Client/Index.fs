@@ -33,12 +33,12 @@ let init() =
         }
     // Get actual data
     let getHello() = Fetch.get<unit, string> Route.hello
-    let getMeetings() = Fetch.get<unit, Meeting> Route.meeting
+    let getMeetings() = Fetch.get<unit, Meeting list> Route.meeting
     // Get single Information passed
     let cmd1 = Cmd.OfPromise.perform getHello () GotHello
     // Get List Information Passed
     let cmd2 = Cmd.OfPromise.either getMeetings () GotMeetings GotError
-    model, cmd1
+    model, Cmd.batch([cmd1 ; cmd2])
 
 //Updating the Model for the view
 let update msg model =
@@ -65,7 +65,9 @@ let view model dispatch =
             img [ Src "favicon.png" ]
             h1 [] [ str "fcodemin" ]
             h2 [] [ str model.Hello ]
-            // li [] [ str model.Meetings ]
+            li [] [ str (model.Meetings.ToString()) ]
+            // li [] [ str (model.Meetings.ToString()) ]
+                // Iterator
             // p [] [ str model.Errors ]
         ]
     ]
