@@ -23,11 +23,11 @@ type Storage () =
 
 // Faking Data
 let storage = Storage()
-storage.AddMeeting(Meeting.create "Event 1" (DateTime(2021,05,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
-storage.AddMeeting(Meeting.create "Event 2" (DateTime(2021,05,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
-storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,06,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
-// This should be illegal
-storage.AddMeeting(Meeting.create "Event Negative" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
+storage.AddMeeting(Meeting.create "Event 1" (DateTime(2021,07,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
+storage.AddMeeting(Meeting.create "Event 2" (DateTime(2021,08,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,09,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+// This should be illegal after a certain time
+storage.AddMeeting(Meeting.create "Event Negative" (DateTime(2021,06,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
 
 // let loadMeeting meeting next ctx = task {
 //     let meet = {Title = meeting}

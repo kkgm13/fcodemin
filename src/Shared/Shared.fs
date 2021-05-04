@@ -10,6 +10,12 @@ type Meeting = {
     Duration : TimeSpan
 }
 
+type SaveMeetingRequest = {
+    Title : string
+    Start : DateTime
+    Duration : TimeSpan
+}
+
 // type Schedule =
 //     | Once of DateTime * TimeSpan
 //     | Repeatedly of DateTime * TimeSpan * TimeSpan
@@ -43,8 +49,6 @@ module Meeting =
 module Route =
     let hello = "/api/hello"
     let meeting = "/api/meetings"
-    // let builder typeName methodName =
-    //     sprintf "/api/%s/%s" typeName methodName
 
 type IMeetingsApi =
     { getMeetings : unit -> Meeting list 
