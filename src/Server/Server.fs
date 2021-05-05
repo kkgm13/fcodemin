@@ -3,8 +3,11 @@ module Server
 open Giraffe
 open Saturn
 open System
+open Microsoft.AspNetCore.Http
+open FSharp.Control.Tasks
 
 open Shared
+
 
 type Storage () =
     // Storage Faker Arrays
@@ -29,10 +32,11 @@ storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,09,29,15,0,0)) (TimeS
 // This should be illegal after a certain time
 storage.AddMeeting(Meeting.create "Event Negative" (DateTime(2021,06,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
 
-// let loadMeeting meeting next ctx = task {
-//     let meet = {Title = meeting}
-//     return! json meet next ctx
-// }
+let saveMeeting next (ctx:HttpContext) = task {
+    let! meeting = ctx.BindModelAsync<SaveMeetingRequest>()
+    do! Database.saveMeeting meeting // Database giving issues despite from Giraffe
+    return! Successful.OK "Saved Meeting" next ctx
+}
 
 let meetApi = 
     {
@@ -51,6 +55,7 @@ let webApp =
         // get "/meetings/" (json (storage.GetMeetings())) 
         get Route.meeting (json (meetApi.getMeetings()))// Send everything???
         // getf "/api/meeting/%i" loadMeeting
+        post Route.meeting saveMeeting
     }
 
 

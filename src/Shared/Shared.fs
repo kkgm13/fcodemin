@@ -10,12 +10,6 @@ type Meeting = {
     Duration : TimeSpan
 }
 
-type SaveMeetingRequest = {
-    Title : string
-    Start : DateTime
-    Duration : TimeSpan
-}
-
 // type Schedule =
 //     | Once of DateTime * TimeSpan
 //     | Repeatedly of DateTime * TimeSpan * TimeSpan
@@ -54,3 +48,8 @@ type IMeetingsApi =
     { getMeetings : unit -> Meeting list 
         // async can throw an issue based on the Middleware implementaion
       addMeeting : Meeting -> Async<Meeting> }
+type SaveMeetingRequest = {
+    Title : string
+    Start : DateTime
+    Duration : TimeSpan
+}

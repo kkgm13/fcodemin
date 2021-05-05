@@ -18,8 +18,8 @@ type Msg =
     | GotHello of string
     | GotMeetings of Meeting list
     | SetInput of string
-    | AddMeet
-    | AddedMeet of Meeting
+    | AddMeeting
+    | MeetingSaved of Meeting
     | GotError of exn // Server Error Handler
 
 //Model Initializing
@@ -36,9 +36,9 @@ let init() =
     let getHello() = Fetch.get<unit, string> Route.hello
     // Get actual data, and fix it as a list to bypass JSON format
     let getMeetings() = Fetch.get<unit, Meeting list> Route.meeting
-    let saveMeeting meet = 
-        let save meet = Fetch.post<SaveMeetingRequest,int> (Route.meeting, meet)
-        Cmd.OfPromise.perform save meet 
+    let addMeet meet = 
+        let save meet = Fetch.post<SaveMeetingRequest,Meeting> (Route.meeting, meet)
+        Cmd.OfPromise.perform save meet MeetingSaved
     // Get single Information passed
     let cmd1 = Cmd.OfPromise.perform getHello () GotHello
     // Get List Information Passed
@@ -54,12 +54,12 @@ let update msg model =
         { model with Meetings = meet}, Cmd.none // Need to separate each one out
     | SetInput value ->
         { model with Input = value}, Cmd.none
-    // | AddMeet -> 
-    //     let meet = Meeting.create model.Input
-    //     let cmd = Cmd.OfAsync.perform __.addMeeting () meet
-    //     AddedMeet 
-    //     {model with Input = ""}, cmd
-    | AddedMeet meet ->
+    | AddMeeting ->
+        let meet = Meeting.create model.Input
+        let cmd = Cmd.OfAsync.perform addMeet () meet AddedMeet 
+        model, AddMeeting meet
+        // { model with Input = ""}, cmd
+    | MeetingSaved meet ->
         { model with Meetings = model.Meetings @ [ meet ]}, Cmd.none
     | GotError ex ->
         {model with Errors = ex.Message :: model.Errors}, Cmd.none
