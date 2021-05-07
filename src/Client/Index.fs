@@ -18,7 +18,7 @@ type Msg =
     | GotHello of string
     | GotMeetings of Meeting list   // Get Meetings from Storage/DB
     | SetInput of string            // HTML input
-    | SaveMeeting                   // Save Meeting
+    | SaveMeeting of obj                   // Save Meeting
     | LoadMeeting                   // Load Meeting
     | MeetingLoaded of Meeting      // Meeting Loaded
     | MeetingSaved of Meeting           // Meeting Saved
@@ -64,17 +64,19 @@ let update msg model =
     // Sample Hello
     | GotHello hello ->
         { model with Hello = hello }, Cmd.none
-    // Get the Meetings from Storage (Possible todo: Get DB info)
+    // 
+    /// <summary>
+    /// Get the Meetings from Storage (Possible todo: Get DB info)
+    /// </summary>
+    /// <returns>List of Meetings</returns>
     | GotMeetings meet ->
         { model with Meetings = meet}, Cmd.none // Need to separate each one out
     // HTML Input Value
     | SetInput value ->
         { model with Input = value}, Cmd.none
     // Save Meeting to the Server
-    // | SaveMeeting ->
-    //     let meet = Meeting.create model.Input
-        // let cmd = Cmd.OfPromise.perform saveMeet () meet AddedMeet 
-        // model, saveMeet meet // Correct call triggering issue
+    | SaveMeeting request->
+        model, saveMeet request // Correct call triggering issue
     // Load a single Meeting
     // | LoadMeeting customerId ->
     //     // test
@@ -93,67 +95,94 @@ open Fable.React.Props
 // Update and Render to the Client
 let view model dispatch =
     // Main Container (ONLY 1 IS ALLOWED!!)
-    div [ Style [ TextAlign TextAlignOptions.Center; Padding 40 ] ] [
+    div [ ] [
         // Each inner is a variation of each section
-        div [] [
+        div [Style [ TextAlign TextAlignOptions.Center; Padding 40 ]] [
             img [ Src "favicon.png" ]
             h1 [] [ str "fcodemin" ]
             h2 [] [ str model.Hello ]
         ]
-        // Meeting List Variation Section
-        div [] [
-            ul [ Style [TextAlign TextAlignOptions.Left;] ] [
-                for meet in model.Meetings do // Loop around a list collection on view
-                    li [OnMouseEnter (fun _ -> ())] [ str meet.Title ] // Concatination needed.
+        // Bootstrap
+        div [ Class "container" ][ 
+            div [ Class "row" ] [
+                // Meeting List Variation Section
+                div [Class "col-8"] [
                     ul [ Style [TextAlign TextAlignOptions.Left;] ] [
-                        li [] [ str (meet.Start.ToLocalTime().ToString()) ]
-                        li [] [ str (meet.Duration.ToString())]
-                        li [] [ str (meet.Id.ToString())]
+                        for meet in model.Meetings do // Loop around a list collection on view
+                            li [OnMouseEnter (fun _ -> ())] [ str meet.Title ] // Concatination needed.
+                            ul [ Style [TextAlign TextAlignOptions.Left;] ] [
+                                li [] [ str (meet.Start.ToLocalTime().ToString()) ]
+                                li [] [ str (meet.Duration.ToString())]
+                                li [] [ str (meet.Id.ToString())]
+                            ]
                     ]
-            ]
-            // Error List (will come out blank, but present an empty array)
-            p [] [ str (model.Errors.ToString()) ]
-        ]
-        // Meeting Form Variation Section
-        div [] [
-            // Form is interesting due to possible conversion and implementation
-            form [ Action "" ][
-                // Label
-                label [ HTMLAttr.Custom ("for", "title") ][ str "Meeting Name:" ]
-                    // Text Input
-                input [ 
-                        Type "text"
-                        Id "title"
-                        Name "title"
-                        Placeholder "Meeting Name" 
+                    // Error List (will come out blank, but present an empty array)
+                    p [] [ str (model.Errors.ToString()) ]
+                ]
+                // Meeting Form Variation Section
+                div [ Class "col-4" ] [
+                    // Form is interesting due to the conversion
+                    form [ Action "" ][
+                        // Label
+                        div [ Class "mb-3" ][
+                            label [ HTMLAttr.Custom ("for", "title") 
+                                    Class "form-label"]
+                                [ str "Meeting Name:" ]
+                            // Text Input
+                            input [ 
+                                Type "text"
+                                Id "title"
+                                Name "title"
+                                Placeholder "Meeting Name"
+                                Class "form-control"
+                            ]
+                        ]
+                        div [ Class "mb-3" ][
+                            // Date Creation
+                            label [ HTMLAttr.Custom ("for", "date") 
+                                    Class "form-label" ][ str "Meeting Date:" ]
+                                // Date-Time-Local Input
+                            input [ 
+                                Type "datetime-local"
+                                Id "start"
+                                Name "start"
+                                Placeholder "Meeting Date" 
+                                Class "form-control"
+                            ]
+                        ]
+                        div [ Class "mb-3" ][
+                            // Duration Creation
+                            label [ HTMLAttr.Custom ("for", "duration") 
+                                    Class "form-label" ][ str "Meeting Duration:" ]
+                                // Number Input
+                            input [ 
+                                Type "number"
+                                Id "duration"
+                                Name "duration"
+                                Placeholder "Duration (Hour)" 
+                                Min 1
+                                Class "form-control"
+                            ]
+                        ]
+                        // Input Submit / Reset
+                        hr []
+                        div [Class "row"][
+                            div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
+                                input [ 
+                                    Type "submit"
+                                    Value "Submit" 
+                                    Class "btn btn-success "
+                                ]
+                            ]
+                            div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
+                                input [
+                                    Type "reset" 
+                                    Class "btn btn-danger btn-block"
+                                ]
+                            ]
+                        ]
                     ]
-                br [] 
-                // Date Creation
-                label [ HTMLAttr.Custom ("for", "date") ][ str "Meeting Date:" ]
-                    // Date-Time-Local Input
-                input [ 
-                        Type "datetime-local"
-                        Id "start"
-                        Name "start"
-                        Placeholder "Meeting Date" 
-                    ]
-                br [] 
-                // Duration Creation
-                label [ HTMLAttr.Custom ("for", "duration") ][ str "Meeting Duration:" ]
-                    // Number Input
-                input [ 
-                        Type "number"
-                        Id "duration"
-                        Name "duration"
-                        Placeholder "Duration (Hour)" 
-                        Min 1
-                    ]
-                // Input Submit / Reset
-                hr []
-                input [ 
-                    Type "submit"
-                    Value "Submit" ]
-                input [ Type "reset" ]
+                ]
             ]
         ]
     ]
