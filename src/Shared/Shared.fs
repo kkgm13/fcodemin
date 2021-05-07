@@ -2,7 +2,7 @@ namespace Shared
 
 open System
 
-// Guessing Shared Object files between server and client
+// Main Shared Object files between server and client (Model Spec)
 type Meeting = {
     Id : Guid
     Title : string
@@ -19,7 +19,7 @@ module Meeting =
     let isValid meet  = (
         // If null or whitespace only
         String.IsNullOrWhiteSpace meet.Title ||
-        // If The date and time compared is anything greater than the 
+        // If meeting date and time compared is anything greater than the current time
         DateTime.Compare(meet.Start,DateTime.Now) < 0) |> not
         
     // Add/Create method
@@ -44,10 +44,12 @@ module Route =
     let hello = "/api/hello"
     let meeting = "/api/meetings"
 
-type IMeetingsApi =
-    { getMeetings : unit -> Meeting list 
-        // async can throw an issue based on the Middleware implementaion
-      addMeeting : Meeting -> Async<Meeting> }
+// type IMeetingsApi =
+//     { getMeetings : unit -> Meeting list 
+//         // async can throw an issue based on the Middleware implementaion
+//       addMeeting : Meeting -> Async<Meeting> }
+
+// Provide Data passing between the Client ot Server
 type SaveMeetingRequest = {
     Title : string
     Start : DateTime
