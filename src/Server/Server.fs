@@ -43,8 +43,8 @@ storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,09,29,15,0,0)) (TimeS
 storage.AddMeeting(Meeting.create "Event Negative" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
 
 let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext?
-    let! meeting = ctx.BindModelAsync<SaveMeetingRequest>()
-    // do! Database.addMeeting meeting // Database giving issues despite from Giraffe
+    let! meeting = ctx.BindFormAsync<SaveMeetingRequest>() // Aids with DateTime
+    // do! Database.addMeeting meeting // Database giving issues despite from Giraffe accoding to docs
     return! Successful.OK "Saved Meeting" next ctx
 }
 
@@ -66,8 +66,8 @@ let webApp =
 
         get Route.hello (json "Hello World")
         get Route.meeting (json (storage.GetMeetings()))    // Index Callout
-        post Route.meeting saveMeeting                      // Create Callout
-        // getf "/api/meeting/%i" loadMeeting              // Show? Callout?
+        post "/api/meeting/%i" saveMeeting                      // Create Callout
+        getf "/api/meeting/%i" loadMeeting              // Show? Callout?
     }
 
 

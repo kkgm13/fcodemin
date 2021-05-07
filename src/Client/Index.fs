@@ -40,9 +40,9 @@ let init() =
     let getMeetings() = Fetch.get<unit, Meeting list> Route.meeting
     
     // Load a specific Meeting only
-    // let loadMeeting meetingId =
-    //     let loadMeeting () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%i" meetingId)
-    //     Cmd.OfPromise.perform loadMeeting () MeetingLoaded
+    let loadMeeting meetingId =
+        let loadMeet () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%i" meetingId)
+        Cmd.OfPromise.perform loadMeet () MeetingLoaded
 
     // Send user data to the Server
     let saveMeet meet = 
@@ -76,9 +76,10 @@ let update msg model =
         { model with Input = value}, Cmd.none
     // Save Meeting to the Server
     | SaveMeeting request->
-        model, saveMeet request // Correct call triggering issue
+        model, saveMeet request // Correct call from docs triggering issue
     // Load a single Meeting
-    // | LoadMeeting customerId ->
+    // | LoadMeeting meetingId ->
+    //     model, loadMeeting meetingId
     //     // test
     // Loaded a Single Meeting???
     // | MeetingLoaded meet -> 

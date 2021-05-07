@@ -3,12 +3,21 @@ namespace Shared
 open System
 
 // Main Shared Object files between server and client (Model Spec)
-type Meeting = {
-    Id : Guid
-    Title : string
-    Start : DateTime
-    Duration : TimeSpan
-}
+type Meeting = 
+    {
+        Id : Guid
+        Title : string
+        Start : DateTime
+        Duration : TimeSpan
+    }
+    //Giraffe Model Validations
+    member this.HasErrors() =
+        // Title Var is Empty
+        if this.Title.Length = 0 then Some "No Meeting Title Provided."
+        // Start var provided is past the current date & time now
+        else if this.Start.CompareTo(DateTime.Now) > 0 then Some "This meeting can't happen"
+        // Start var is between any Start var and subsequent durations
+        else None
 
 // type Schedule =
 //     | Once of DateTime * TimeSpan
