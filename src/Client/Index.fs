@@ -19,8 +19,8 @@ type Msg =
     | GotMeetings of Meeting list   // Get Meetings from Storage/DB
     | SetInput of string            // HTML input
     | SaveMeeting of obj                   // Save Meeting
-    | LoadMeeting                   // Load Meeting
-    | MeetingLoaded of Meeting      // Meeting Loaded
+    // | LoadMeeting                   // Load Meeting
+    // | MeetingLoaded of Meeting      // Meeting Loaded
     | MeetingSaved of Meeting           // Meeting Saved
     | GotError of exn               // Server Error Handler
 
@@ -40,9 +40,9 @@ let init() =
     let getMeetings() = Fetch.get<unit, Meeting list> Route.meeting
     
     // Load a specific Meeting only
-    let loadMeeting meetingId =
-        let loadMeet () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%i" meetingId)
-        Cmd.OfPromise.perform loadMeet () MeetingLoaded
+    // let loadMeeting meetingId =
+    //     let loadMeet () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%i" meetingId)
+    //     Cmd.OfPromise.perform loadMeet () MeetingLoaded
 
     // Send user data to the Server
     let saveMeet meet = 

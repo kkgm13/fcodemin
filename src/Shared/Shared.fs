@@ -29,7 +29,9 @@ module Meeting =
         // If null or whitespace only
         String.IsNullOrWhiteSpace meet.Title ||
         // If meeting date and time compared is anything greater than the current time
-        DateTime.Compare(meet.Start,DateTime.Now) < 0) |> not
+        DateTime.Compare(meet.Start,DateTime.Now) < 0
+        // If an existing
+                        ) |> not
         
     // Add/Create method
     let create title start duration= 
