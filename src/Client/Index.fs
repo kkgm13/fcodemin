@@ -18,7 +18,7 @@ type Msg =
     | GotHello of string
     | GotMeetings of Meeting list   // Get Meetings from Storage/DB
     | SetInput of string            // HTML input
-    | SaveMeeting of obj                   // Save Meeting
+    | SaveMeeting of SaveMeetingRequest                   // Save Meeting
     // | LoadMeeting                   // Load Meeting
     // | MeetingLoaded of Meeting      // Meeting Loaded
     | MeetingSaved of Meeting           // Meeting Saved
@@ -43,13 +43,6 @@ let init() =
     // let loadMeeting meetingId =
     //     let loadMeet () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%i" meetingId)
     //     Cmd.OfPromise.perform loadMeet () MeetingLoaded
-
-    // Send user data to the Server
-    let saveMeet meet = 
-        // Tell server a POST request is coming
-        let save meet = Fetch.post<SaveMeetingRequest,Meeting> (Route.meeting, meet)
-        // Create the promise function to save
-        Cmd.OfPromise.perform save meet MeetingSaved
         
     // Induct Command Modules
     // Get single Information passed
@@ -57,6 +50,13 @@ let init() =
     // Get List Information Passed
     let cmd2 = Cmd.OfPromise.either getMeetings () GotMeetings GotError
     model, Cmd.batch([cmd1 ; cmd2])
+
+// Send user data to the Server
+let saveMeet meet = 
+    // Tell server a POST request is coming
+    let save meet = Fetch.post<SaveMeetingRequest,Meeting> (Route.meeting, meet)
+    // Create the promise function to save
+    Cmd.OfPromise.perform save meet MeetingSaved
 
 //Updating the Model for the view
 let update msg model =
@@ -163,6 +163,7 @@ let view model dispatch =
                                 Placeholder "Duration (Hour)" 
                                 Min 1
                                 Class "form-control"
+                                Step 0.1
                             ]
                         ]
                         // Input Submit / Reset
@@ -172,7 +173,7 @@ let view model dispatch =
                                 input [ 
                                     Type "submit"
                                     Value "Submit" 
-                                    Class "btn btn-success "
+                                    Class "btn btn-success"
                                 ]
                             ]
                             div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
