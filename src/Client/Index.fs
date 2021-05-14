@@ -64,7 +64,6 @@ let update msg model =
     // Sample Hello
     | GotHello hello ->
         { model with Hello = hello }, Cmd.none
-    // 
     /// <summary>
     /// Get the Meetings from Storage (Possible todo: Get DB info)
     /// </summary>
@@ -77,13 +76,6 @@ let update msg model =
     // Save Meeting to the Server
     | SaveMeeting request->
         model, saveMeet request // Correct call from docs triggering issue
-    // Load a single Meeting
-    // | LoadMeeting meetingId ->
-    //     model, loadMeeting meetingId
-    //     // test
-    // Loaded a Single Meeting???
-    // | MeetingLoaded meet -> 
-    //    {model with }, Cmd.none
     | MeetingSaved meet ->
         { model with Meetings = model.Meetings @ [ meet ]}, Cmd.none
     | GotError ex ->
@@ -123,7 +115,7 @@ let view model dispatch =
                 // Meeting Form Variation Section
                 div [ Class "col-4" ] [
                     // Form is interesting due to the conversion
-                    form [ Action "" ][
+                    form [ ][
                         // Label
                         div [ Class "mb-3" ][
                             label [ HTMLAttr.Custom ("for", "title") 
@@ -170,10 +162,10 @@ let view model dispatch =
                         hr []
                         div [Class "row"][
                             div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
-                                input [ 
-                                    Type "submit"
-                                    Value "Submit" 
-                                    Class "btn btn-success"
+                                button [Class "btn btn-success"][
+                                    // Type "submit"
+                                    str "Submit" 
+                                    // OnClick (fun _ -> dispatch AddMeeting)
                                 ]
                             ]
                             div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
