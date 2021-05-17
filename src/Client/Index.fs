@@ -9,8 +9,8 @@ open Shared
 type Model =
     {
         Hello: string
-        Meetings: Meeting list
-        Input: string
+        Meetings: Meeting list  // List of Meetings
+        Input: string       // Input Setter
         Errors: string list // Server Error Handler
     }
 
@@ -164,8 +164,8 @@ let view model dispatch =
                             div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
                                 button [Class "btn btn-success"][
                                     // Type "submit"
-                                    str "Submit" 
-                                    // OnClick (fun _ -> dispatch AddMeeting)
+                                    str "Submit"
+                                    // OnClick (fun _ -> dispatch )
                                 ]
                             ]
                             div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][

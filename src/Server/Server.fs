@@ -43,6 +43,8 @@ storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,09,29,15,0,0)) (TimeS
 storage.AddMeeting(Meeting.create "Event Negative" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
 
 let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext?
+    let ats = ctx.GetFormValue.ToString()
+    // printfn ats
     let! meeting = ctx.BindFormAsync<SaveMeetingRequest>() // Aids with DateTime
     // do! Database.addMeeting meeting // Database giving issues despite from Giraffe accoding to docs
     storage.AddMeeting(Meeting.create meeting.Title (meeting.Start) (meeting.Duration)) |> ignore
