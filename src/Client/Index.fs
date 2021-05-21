@@ -5,37 +5,46 @@ open Thoth.Fetch
 open Shared
 
 //////////////////////////////////////
-/// Default Information Types
+/// Default Model Instance Type
 //////////////////////////////////////
-
-// Model Instance
 type Model =
     {
         Hello: string
         Meetings: Meeting list  // List of Meetings
+        // All HTML Input Tags MUST HAVE THEIR OWN DEDICATED Model
         TitleInput: string       // Input Setter
+        StartInput: string       // Input Setter
+        DurationInput: double       // Input Setter
         Errors: string list // Server Error Handler
     }
 
-// Messages Instances
+//////////////////////////////////////
+/// Default Model Message Instance
+//////////////////////////////////////
 type Msg =
     | GotHello of string
     | LoadMeeting of Meeting            // Get Specified Meeting from Storage/DB
     | LoadMeetings of Meeting list      // Get Meetings from Storage/DB
     | MeetingLoaded of Meeting          // Loaded Meetings 
-    | SetInput of string            // HTML input
-    // | SaveMeeting of SaveMeetingRequest                   // Save Meeting
+    // All HTML Input Tags MUST HAVE THEIR OWN DEDICATED MESSAGE
+    | SetTitleInput of string            // HTML Title input
+    | SetStartInput of string            // HTML DateTime input
+    | SetDurationInput of double            // HTML Number input
+    | SaveMeeting of SaveMeetingRequest                   // Save Meeting
     | MeetingSaved of Meeting           // Meeting Saved
     | GotError of exn               // Server Error Handler
-    | AddNewMeeting
 
-// Model Initializing
+//////////////////////////////////////
+/// Default Model Initializations
+//////////////////////////////////////
 let init() =
     // Default Model Info to add
     let model =
         {
-            Hello = "Test"  // Sample text
-            TitleInput = ""   // Needs Input 
+            Hello = "Test"          // Sample text
+            TitleInput = ""         // Title Input
+            StartInput = ""         // Start Input
+            DurationInput = double 0       // Duration Input
             Meetings = []   // Blank Meetings Data
             Errors = []     // Blank Errors
         }
@@ -57,7 +66,8 @@ let init() =
 //     Cmd.OfPromise.perform loadMeeting () MeetingLoaded
 
 // Send user data to the Server
-let saveMeet meet = 
+let saveMeeting meet = 
+    // printf "%s" (meet.ToString())
     // Tell server a POST request is coming
     let save meet = Fetch.post<SaveMeetingRequest,Meeting> (Route.meeting, meet)
     // Create the promise function to save
@@ -76,20 +86,38 @@ let update msg model =
     | LoadMeetings meet ->
         { model with Meetings = meet}, Cmd.none
     /// <summary>
-    /// Get a Selected Meeting (Possible todo: Get DB info)
+    /// Set the Value for Title
     /// </summary>
-    /// <returns>Specified Meeting</returns>
-    // | LoadMeeting meetId ->
-    //     model, loadMeeting meetId
-    // HTML Input Value
-    | SetInput value ->
+    /// <returns>HTML Input Value for Title</returns>
+    | SetTitleInput value ->
+        printfn "Value for Input: %s" model.TitleInput // Debug to the Browser Console
         { model with TitleInput = value}, Cmd.none
+    /// <summary>
+    /// Set the Value for Title
+    /// </summary>
+    /// <returns>HTML Input Value for Title</returns>
+    | SetStartInput value ->
+        printfn "Value for Input: %s" model.StartInput // Debug to the Browser Console
+        { model with StartInput = value}, Cmd.none
+    /// <summary>
+    /// Set the Value for Title
+    /// </summary>
+    /// <returns>HTML Input Value for Title</returns>
+    | SetDurationInput value ->
+        printfn "Value for Input: %s" (model.DurationInput.ToString()) // Debug to the Browser Console
+        { model with DurationInput = (double) value}, Cmd.none
+    /// <summary>
+    /// Save the Meeting???
+    /// </summary>
+    /// <returns>???</returns>
+    | SaveMeeting request ->
+        model, saveMeeting request
+        /// <summary>
+    /// Set the Value for Title
+    /// </summary>
+    /// <returns>HTML Input Value for Title</returns>
     | MeetingSaved meet ->
         { model with Meetings = model.Meetings @ [ meet ]}, Cmd.none
-    | AddNewMeeting when model.TitleInput = "" -> 
-        model, Cmd.none
-    | AddNewMeeting ->
-        { model with TitleInput = "" }, Cmd.none
     /// <summary>
     /// Get any errors found in the system
     /// </summary>
@@ -108,7 +136,9 @@ open Fable.React.Props
 ///////////////////////////////////
 let topSection model =
     div [Style [ TextAlign TextAlignOptions.Center; Padding 40 ]] [
-        img [ Src "favicon.png" ]
+        a [Href "/"][
+            img [ Src "favicon.png" ]
+        ]
         h1 [] [ str "fcodemin" ]
         h2 [] [ str model.Hello ]
     ]
@@ -124,8 +154,8 @@ let meetList model =
             for meet in model.Meetings do
                 li [OnMouseEnter (fun _ -> ())] [ str meet.Title ]
                 ul [ Style [TextAlign TextAlignOptions.Left;] ] [
-                    // li [] [ str (meet.Start.ToLocalTime().ToString()) ]
-                    // li [] [ str (meet.Duration.ToString())]
+                    li [] [ str (meet.Start.ToLocalTime().ToString()) ]
+                    li [] [ str (meet.Duration.ToString())]
                     li [] [ str (meet.Id.ToString())]
                 ]
         ]
@@ -139,49 +169,56 @@ let meetList model =
 let meetForm model dispatch = 
     div [ Class "col-4" ] [
         // Form is interesting due to the conversion
-        form [ ] [
+        div [  ] [
             // Label
             div [ Class "mb-3" ][
-                label [ HTMLAttr.Custom ("for", "title") 
+                label [ HTMLAttr.Custom ("for", "Title") 
                         Class "form-label"]
                     [ str "Meeting Name:" ]
                 // Text Input
                 input [ 
+                    Value model.TitleInput
                     Type "text"
-                    Id "title"
-                    Name "title"
+                    Id "Title"
+                    Name "Title"
                     Placeholder "Meeting Name"
                     Class "form-control"
+                    OnChange (fun e -> dispatch(SetTitleInput((e.target :?> Browser.Types.HTMLInputElement).value)))
+                    // OnInput (fun e -> dispatch SetInput e.currentTarget.value )
                 ]
             ]
             div [ Class "mb-3" ][
                 // Date Creation
-                label [ HTMLAttr.Custom ("for", "date") 
+                label [ HTMLAttr.Custom ("for", "Start") 
                         Class "form-label" ][ str "Meeting Date:" ]
                     // Date-Time-Local Input
                 input [ 
+                    Value model.StartInput
                     Type "datetime-local"
-                    Id "start"
-                    Name "start"
+                    Id "Start"
+                    Name "Start"
                     Placeholder "Meeting Date" 
                     Class "form-control"
-                    Disabled true
+                    OnChange (fun e -> dispatch(SetStartInput((e.target :?> Browser.Types.HTMLInputElement).value)))
+                    // Disabled true
                 ]
             ]
             div [ Class "mb-3" ][
                 // Duration Creation
-                label [ HTMLAttr.Custom ("for", "duration") 
+                label [ HTMLAttr.Custom ("for", "Duration") 
                         Class "form-label" ][ str "Meeting Duration:" ]
                     // Number Input
                 input [ 
+                    Value model.DurationInput
                     Type "number"
-                    Id "duration"
-                    Name "duration"
-                    Placeholder "Duration (Hour)" 
+                    Id "Duration"
+                    Name "Duration"
+                    Placeholder "Meeting Duration (Hour)" 
                     Min 1
                     Class "form-control"
                     Step 0.1
-                    Disabled true
+                    OnChange (fun e -> dispatch(SetDurationInput(double (e.target :?> Browser.Types.HTMLInputElement).value)))
+                    // Disabled true
                 ]
             ]
             // Input Submit / Reset
@@ -189,10 +226,13 @@ let meetForm model dispatch =
             div [Class "row"][
                 div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
                     // Form submit can't work so the use of Button needs to be used 
-                    button [Class "btn btn-success"][
-                        // Type "submit"
+                    button [
+                        Class "btn btn-success"
+                        OnClick (fun e -> printf "%s" (e.initEvent.ToString()))
+                        ] [                        // Type "submit"
                         str "Submit"
-                        // OnClick (fun _ -> dispatch AddNewMeeting)
+                        //
+
                     ]
                 ]
                 div [Class "col-md-6 col-sm-12 py-1 d-grid gap-2"][
