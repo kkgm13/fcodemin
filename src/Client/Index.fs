@@ -184,7 +184,6 @@ let meetForm model dispatch =
                     Placeholder "Meeting Name"
                     Class "form-control"
                     OnChange (fun e -> dispatch(SetTitleInput((e.target :?> Browser.Types.HTMLInputElement).value)))
-                    // OnInput (fun e -> dispatch SetInput e.currentTarget.value )
                 ]
             ]
             div [ Class "mb-3" ][
