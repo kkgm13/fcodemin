@@ -4,51 +4,57 @@ open Elmish
 open Thoth.Fetch
 open Shared
 
-// Default Information Types
-    // Model Instance
+//////////////////////////////////////
+/// Default Information Types
+//////////////////////////////////////
+
+// Model Instance
 type Model =
     {
         Hello: string
         Meetings: Meeting list  // List of Meetings
-        Input: string       // Input Setter
+        TitleInput: string       // Input Setter
         Errors: string list // Server Error Handler
     }
 
+// Messages Instances
 type Msg =
     | GotHello of string
-    | GotMeetings of Meeting list   // Get Meetings from Storage/DB
+    | LoadMeeting of Meeting            // Get Specified Meeting from Storage/DB
+    | LoadMeetings of Meeting list      // Get Meetings from Storage/DB
+    | MeetingLoaded of Meeting          // Loaded Meetings 
     | SetInput of string            // HTML input
     // | SaveMeeting of SaveMeetingRequest                   // Save Meeting
     | MeetingSaved of Meeting           // Meeting Saved
     | GotError of exn               // Server Error Handler
     | AddNewMeeting
 
-//Model Initializing
+// Model Initializing
 let init() =
-    // Default Info to add
-    let model : Model =
+    // Default Model Info to add
+    let model =
         {
             Hello = "Test"  // Sample text
-            Input = ""   // Needs Input 
+            TitleInput = ""   // Needs Input 
             Meetings = []   // Blank Meetings Data
             Errors = []     // Blank Errors
         }
+
     // Get actual data
     let getHello() = Fetch.get<unit, string> Route.hello
     // Get actual data, and fix it as a list to bypass JSON format
-    let getMeetings() = Fetch.get<unit, Meeting list> Route.meeting
-    
-    // Load a specific Meeting only
-    // let loadMeeting meetingId =
-    //     let loadMeet () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%i" meetingId)
-    //     Cmd.OfPromise.perform loadMeet () MeetingLoaded
-        
+    let loadMeetings() = Fetch.get<unit, Meeting list> Route.meeting
+
     // Induct Command Modules
     // Get single Information passed
     let cmd1 = Cmd.OfPromise.perform getHello () GotHello
     // Get List Information Passed
-    let cmd2 = Cmd.OfPromise.either getMeetings () GotMeetings GotError
+    let cmd2 = Cmd.OfPromise.either loadMeetings () LoadMeetings GotError
     model, Cmd.batch([cmd1 ; cmd2])
+
+// let loadMeeting meetId =
+//     let loadMeeting () = Fetch.get<unit, Meeting> (sprintf "/api/customer/%i" meetId)
+//     Cmd.OfPromise.perform loadMeeting () MeetingLoaded
 
 // Send user data to the Server
 let saveMeet meet = 
@@ -67,59 +73,73 @@ let update msg model =
     /// Get the Meetings from Storage (Possible todo: Get DB info)
     /// </summary>
     /// <returns>List of Meetings</returns>
-    | GotMeetings meet ->
-        { model with Meetings = meet}, Cmd.none // Need to separate each one out
+    | LoadMeetings meet ->
+        { model with Meetings = meet}, Cmd.none
+    /// <summary>
+    /// Get a Selected Meeting (Possible todo: Get DB info)
+    /// </summary>
+    /// <returns>Specified Meeting</returns>
+    // | LoadMeeting meetId ->
+    //     model, loadMeeting meetId
     // HTML Input Value
     | SetInput value ->
-        { model with Input = value}, Cmd.none
-    // Save Meeting to the Server
-    // | SaveMeeting request->
-    //     model, saveMeet request // Correct call from docs triggering issue
-        // {model with 
-        //     Input = ""
-        //     List.append state.Meetings [state.Input] }
+        { model with TitleInput = value}, Cmd.none
     | MeetingSaved meet ->
         { model with Meetings = model.Meetings @ [ meet ]}, Cmd.none
-    | GotError ex ->
-        { model with Errors = ex.Message :: model.Errors }, Cmd.none
-    | AddNewMeeting when model.Input = "" -> 
+    | AddNewMeeting when model.TitleInput = "" -> 
         model, Cmd.none
     | AddNewMeeting ->
-        { model with Input = "" }, Cmd.none
+        { model with TitleInput = "" }, Cmd.none
+    /// <summary>
+    /// Get any errors found in the system
+    /// </summary>
+    /// <returns>List of Errors if any else empty array</returns>
+    | GotError ex ->
+        { model with Errors = ex.Message :: model.Errors }, Cmd.none
 
-// Set up the React Portion of HTML
+/////////////////////////////////////////////////////
+/// Set up the React Portion of HTML
+///////////////////////////////////////////////////// 
 open Fable.React
 open Fable.React.Props
 
-// Main Header HTML
-let topSection =
+///////////////////////////////////
+/// HEADER COMPONENT VIEW FUNCTION
+///////////////////////////////////
+let topSection model =
     div [Style [ TextAlign TextAlignOptions.Center; Padding 40 ]] [
         img [ Src "favicon.png" ]
         h1 [] [ str "fcodemin" ]
-        // h2 [] [ str model.Hello ]
+        h2 [] [ str model.Hello ]
     ]
- // Meeting List 
-let meetList model dispatch=
+
+///////////////////////////////////
+/// MEETING LIST COMPONENT VIEW FUNCTION
+///////////////////////////////////
+let meetList model =
     // Meeting List Variation Section
     div [Class "col-8"] [
         ul [ Style [TextAlign TextAlignOptions.Left;] ] [
-            for meet in model.Meetings do // Loop around a list collection on view
-                li [OnMouseEnter (fun _ -> ())] [ str meet.Title ] // Concatination needed.
+            // Loop around the Meetings list collection on view
+            for meet in model.Meetings do
+                li [OnMouseEnter (fun _ -> ())] [ str meet.Title ]
                 ul [ Style [TextAlign TextAlignOptions.Left;] ] [
-                    li [] [ str (meet.Start.ToLocalTime().ToString()) ]
-                    li [] [ str (meet.Duration.ToString())]
+                    // li [] [ str (meet.Start.ToLocalTime().ToString()) ]
+                    // li [] [ str (meet.Duration.ToString())]
                     li [] [ str (meet.Id.ToString())]
                 ]
         ]
         // Error List (will come out blank, but present an empty array)
-        p [] [ str (model.Errors.ToString()) ]
+        p [] [ str (model.Errors.ToString())]
     ]
 
-// Form
+///////////////////////////////////
+/// FORM COMPONENT VIEW FUNCTION
+///////////////////////////////////
 let meetForm model dispatch = 
     div [ Class "col-4" ] [
         // Form is interesting due to the conversion
-        form [ ][
+        form [ ] [
             // Label
             div [ Class "mb-3" ][
                 label [ HTMLAttr.Custom ("for", "title") 
@@ -145,6 +165,7 @@ let meetForm model dispatch =
                     Name "start"
                     Placeholder "Meeting Date" 
                     Class "form-control"
+                    Disabled true
                 ]
             ]
             div [ Class "mb-3" ][
@@ -160,6 +181,7 @@ let meetForm model dispatch =
                     Min 1
                     Class "form-control"
                     Step 0.1
+                    Disabled true
                 ]
             ]
             // Input Submit / Reset
@@ -183,17 +205,19 @@ let meetForm model dispatch =
         ]
     ]
 
-// Update and Render to the Client
+///////////////////////////////////
+/// CORE VIEW FUNCTION
+///////////////////////////////////
 let view model dispatch =
     // Main Container (ONLY 1 IS ALLOWED!!)
     div [ ] [
         // Each inner is a variation of each section
-        topSection 
+        topSection model
         // Bootstrap
         div [ Class "container" ][ 
             div [ Class "row" ] [
                 //Meeting List
-                meetList model dispatch
+                meetList model
                 // Meeting Form Variation Section
                 meetForm model dispatch
             ]

@@ -25,29 +25,39 @@ type Storage () =
 
 // Storage Template
 let storage = Storage()
+
 // Issue with loading single Meeting
 let loadMeeting (meetId: int) next ctx = task {
     let meet = {
-        Title = "Event 1"
-        Start = (DateTime(2021,07,16,15,0,0))
-        Duration = (TimeSpan.FromHours(1.0))
+            Title = "Event 1"
+            // Start = (DateTime(2021,07,16,15,0,0))
+            // Duration = (TimeSpan.FromHours(1.0))
         }
     return! json meet next ctx
 }
 
 // Faking Data
-storage.AddMeeting(Meeting.create "Event 1" (DateTime(2021,07,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
-storage.AddMeeting(Meeting.create "Event 2" (DateTime(2021,08,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
-storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,09,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
+storage.AddMeeting(Meeting.create "Event 1"
+                    // (DateTime(2021,07,16,15,0,0)) (TimeSpan.FromHours(1.0))
+                    ) |> ignore
+                     
+storage.AddMeeting(Meeting.create "Event 2" 
+                    // (DateTime(2021,08,29,15,0,0)) (TimeSpan.FromHours(1.0))
+                    ) |> ignore
+storage.AddMeeting(Meeting.create "Event 3" 
+                    // (DateTime(2021,09,29,15,0,0)) (TimeSpan.FromHours(1.0))
+                    ) |> ignore
 // This should be illegal after a certain time
-storage.AddMeeting(Meeting.create "Event Negative" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
+storage.AddMeeting(Meeting.create "Event Negative"
+                    // (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0))
+                    ) |> ignore 
 
 let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext?
     let ats = ctx.GetFormValue.ToString()
     // printfn ats
     let! meeting = ctx.BindFormAsync<SaveMeetingRequest>() // Aids with DateTime
     // do! Database.addMeeting meeting // Database giving issues despite from Giraffe accoding to docs
-    storage.AddMeeting(Meeting.create meeting.Title (meeting.Start) (meeting.Duration)) |> ignore
+    storage.AddMeeting(Meeting.create meeting.Title) |> ignore
     return! Successful.OK "Saved Meeting" next ctx
 }
 
@@ -58,8 +68,8 @@ let webApp =
 
         get Route.hello (json "Hello World")
         get Route.meeting (json (storage.GetMeetings()))    // Index Callout
-        post "/api/meeting/%i" saveMeeting                      // Create Callout
-        // getf "/api/meeting/%i" loadMeeting              // Show? Callout?
+        getf "/api/meeting/%i" loadMeeting              // Show? Callout?
+        // post "/api/meeting/" saveMeeting                      // Create Callout
     }
 
 
