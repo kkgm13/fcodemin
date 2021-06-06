@@ -3,6 +3,7 @@ module Index
 open Elmish
 open Thoth.Fetch
 open Shared
+// open System
 
 //////////////////////////////////////
 /// Default Model Instance Type
@@ -14,8 +15,9 @@ type Model =
         // All HTML Input Tags MUST HAVE THEIR OWN DEDICATED Model
         TitleInput: string       // Input Setter
         StartInput: string       // Input Setter
-        DurationInput: double       // Input Setter
+        DurationInput: int       // Input Setter
         Errors: string list // Server Error Handler
+        TheMeeting: Meeting option
     }
 
 //////////////////////////////////////
@@ -23,15 +25,18 @@ type Model =
 //////////////////////////////////////
 type Msg =
     | GotHello of string
+    // Data Grabbing
     | LoadMeeting of Meeting            // Get Specified Meeting from Storage/DB
     | LoadMeetings of Meeting list      // Get Meetings from Storage/DB
     | MeetingLoaded of Meeting          // Loaded Meetings 
     // All HTML Input Tags MUST HAVE THEIR OWN DEDICATED MESSAGE
     | SetTitleInput of string            // HTML Title input
     | SetStartInput of string            // HTML DateTime input
-    | SetDurationInput of double            // HTML Number input
+    | SetDurationInput of int            // HTML Number input
+    // Sending to Server
     | SaveMeeting of SaveMeetingRequest                   // Save Meeting
     | MeetingSaved of Meeting           // Meeting Saved
+    // Error Collection
     | GotError of exn               // Server Error Handler
 
 //////////////////////////////////////
@@ -44,9 +49,10 @@ let init() =
             Hello = "Test"          // Sample text
             TitleInput = ""         // Title Input
             StartInput = ""         // Start Input
-            DurationInput = double 0       // Duration Input
-            Meetings = []   // Blank Meetings Data
-            Errors = []     // Blank Errors
+            DurationInput = 0       // Duration Input
+            Meetings = []           // Blank Meetings Data
+            Errors = []             // Blank Errors
+            TheMeeting = None       // Blank Meeting data?
         }
 
     // Get actual data
@@ -54,24 +60,25 @@ let init() =
     // Get actual data, and fix it as a list to bypass JSON format
     let loadMeetings() = Fetch.get<unit, Meeting list> Route.meeting
 
-    // Induct Command Modules
+    // Induct Command Modules on load
     // Get single Information passed
     let cmd1 = Cmd.OfPromise.perform getHello () GotHello
     // Get List Information Passed
     let cmd2 = Cmd.OfPromise.either loadMeetings () LoadMeetings GotError
     model, Cmd.batch([cmd1 ; cmd2])
 
-// let loadMeeting meetId =
-//     let loadMeeting () = Fetch.get<unit, Meeting> (sprintf "/api/customer/%i" meetId)
-//     Cmd.OfPromise.perform loadMeeting () MeetingLoaded
+// Load a single Meeting
+let loadMeeting meetId =
+    let loadMeeting () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%s" meetId)
+    Cmd.OfPromise.perform loadMeeting () MeetingLoaded
 
 // Send user data to the Server
 let saveMeeting meet = 
-    // printf "%s" (meet.ToString())
+    printf "%s" (meet.ToString())
     // Tell server a POST request is coming
     let save meet = Fetch.post<SaveMeetingRequest,Meeting> (Route.meeting, meet)
     // Create the promise function to save
-    Cmd.OfPromise.perform save meet MeetingSaved
+    Cmd.OfPromise.either save meet MeetingSaved GotError
 
 //Updating the Model for the view
 let update msg model =
@@ -79,12 +86,37 @@ let update msg model =
     // Sample Hello
     | GotHello hello ->
         { model with Hello = hello }, Cmd.none
+
     /// <summary>
     /// Get the Meetings from Storage (Possible todo: Get DB info)
     /// </summary>
     /// <returns>List of Meetings</returns>
     | LoadMeetings meet ->
         { model with Meetings = meet}, Cmd.none
+
+    /// <summary>
+    /// Confirm Meeting has been saved
+    /// </summary>
+    /// <returns>Meeting List</returns>
+    | MeetingSaved meetId ->
+        // {model with GeneratedId = Some meetId; Message = "Saved Meetings"}, Cmd.none //????
+        { model with Meetings = model.Meetings @ [ meetId ]}, Cmd.none
+
+    /// <summary>
+    /// Get the Selected Meeting from Storage (Possible todo: Get DB info)
+    /// </summary>
+    /// <returns>Selected Meeting</returns>
+    | LoadMeeting meetId ->
+        let id = meetId.ToString()
+        model, loadMeeting id
+
+    /// <summary>
+    /// Get the Meetings from Storage (Possible todo: Get DB info)
+    /// </summary>
+    /// <returns>List of Meetings</returns>
+    | MeetingLoaded meet->
+        { model with TheMeeting = Some meet }, Cmd.none
+
     /// <summary>
     /// Set the Value for Title
     /// </summary>
@@ -92,32 +124,30 @@ let update msg model =
     | SetTitleInput value ->
         printfn "Value for Input: %s" model.TitleInput // Debug to the Browser Console
         { model with TitleInput = value}, Cmd.none
+
     /// <summary>
-    /// Set the Value for Title
+    /// Print the Value for Start
     /// </summary>
     /// <returns>HTML Input Value for Title</returns>
     | SetStartInput value ->
         printfn "Value for Input: %s" model.StartInput // Debug to the Browser Console
         { model with StartInput = value}, Cmd.none
+
     /// <summary>
-    /// Set the Value for Title
+    /// Print the Value for Duration
     /// </summary>
     /// <returns>HTML Input Value for Title</returns>
     | SetDurationInput value ->
         printfn "Value for Input: %s" (model.DurationInput.ToString()) // Debug to the Browser Console
-        { model with DurationInput = (double) value}, Cmd.none
+        { model with DurationInput = value}, Cmd.none
+
     /// <summary>
     /// Save the Meeting???
     /// </summary>
     /// <returns>???</returns>
     | SaveMeeting request ->
         model, saveMeeting request
-        /// <summary>
-    /// Set the Value for Title
-    /// </summary>
-    /// <returns>HTML Input Value for Title</returns>
-    | MeetingSaved meet ->
-        { model with Meetings = model.Meetings @ [ meet ]}, Cmd.none
+
     /// <summary>
     /// Get any errors found in the system
     /// </summary>
@@ -160,7 +190,10 @@ let meetList model =
                 ]
         ]
         // Error List (will come out blank, but present an empty array)
-        p [] [ str (model.Errors.ToString())]
+        p [] [ 
+            for err in model.Errors do
+                str err
+        ]
     ]
 
 ///////////////////////////////////
@@ -205,18 +238,17 @@ let meetForm model dispatch =
             div [ Class "mb-3" ][
                 // Duration Creation
                 label [ HTMLAttr.Custom ("for", "Duration") 
-                        Class "form-label" ][ str "Meeting Duration:" ]
+                        Class "form-label" ][ str "Meeting Duration: (Minutes)" ]
                     // Number Input
                 input [ 
                     Value model.DurationInput
                     Type "number"
                     Id "Duration"
                     Name "Duration"
-                    Placeholder "Meeting Duration (Hour)" 
+                    Placeholder "Meeting Duration (Minutes)" 
                     Min 1
                     Class "form-control"
-                    Step 0.1
-                    OnChange (fun e -> dispatch(SetDurationInput(double (e.target :?> Browser.Types.HTMLInputElement).value)))
+                    OnChange (fun e -> dispatch(SetDurationInput(int (e.target :?> Browser.Types.HTMLInputElement).value)))
                     // Disabled true
                 ]
             ]
@@ -228,6 +260,7 @@ let meetForm model dispatch =
                     button [
                         Class "btn btn-success"
                         OnClick (fun e -> printf "%s" (e.initEvent.ToString()))
+                        // OnClick (fun e -> dispatch (saveMeeting e.Value))
                         ] [                        // Type "submit"
                         str "Submit"
                         //
