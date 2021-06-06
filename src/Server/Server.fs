@@ -27,8 +27,9 @@ type Storage () =
 let storage = Storage()
 
 // Issue with loading single Meeting
-let loadMeeting (meetId: int) next ctx = task {
+let loadMeeting (meetId: string) next ctx = task {
     let meet = {
+            Id = Guid.Parse(meetId)
             Title = "Event 1"
             Start = (DateTime(2021,07,16,15,0,0))
             Duration = (TimeSpan.FromHours(1.0))
@@ -60,7 +61,7 @@ let webApp =
 
         get Route.hello (json "Hello World")
         get Route.meeting (json (storage.GetMeetings()))    // Index Callout
-        getf "/api/meeting/%i" loadMeeting              // Show? Callout?
+        getf "/api/meeting/%s" loadMeeting              // Show? Callout?
         post Route.meeting saveMeeting                      // Create Callout
     }
 
