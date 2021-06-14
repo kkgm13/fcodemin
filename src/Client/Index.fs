@@ -3,7 +3,7 @@ module Index
 open Elmish
 open Thoth.Fetch
 open Shared
-// open System
+open System
 
 //////////////////////////////////////
 /// Default Model Instance Type
@@ -34,8 +34,8 @@ type Msg =
     | SetStartInput of string            // HTML DateTime input
     | SetDurationInput of int            // HTML Number input
     // Sending to Server
-    | SaveMeeting of SaveMeetingRequest                   // Save Meeting
-    | MeetingSaved of Meeting           // Meeting Saved
+    | SaveMeeting                   // Save Meeting
+    | MeetingSaved of Result<Meeting,string>           // Meeting Saved
     // Error Collection
     | GotError of exn               // Server Error Handler
 
@@ -76,7 +76,7 @@ let loadMeeting meetId =
 let saveMeeting meet = 
     printf "%s" (meet.ToString())
     // Tell server a POST request is coming
-    let save meet = Fetch.post<SaveMeetingRequest,Meeting> (Route.meeting, meet)
+    let save meet = Fetch.post<SaveMeetingRequest,Result<Meeting,string>> ("/api/meeting-sent", meet)
     // Create the promise function to save
     Cmd.OfPromise.either save meet MeetingSaved GotError
 
@@ -98,9 +98,14 @@ let update msg model =
     /// Confirm Meeting has been saved
     /// </summary>
     /// <returns>Meeting List</returns>
-    | MeetingSaved meetId ->
-        // {model with GeneratedId = Some meetId; Message = "Saved Meetings"}, Cmd.none //????
-        { model with Meetings = model.Meetings @ [ meetId ]}, Cmd.none
+    | MeetingSaved (Ok meet) ->
+        { model with Meetings = model.Meetings @ [ meet ]; Errors = ["Meeting Saved"]}, Cmd.none
+    /// <summary>
+    /// Confirm Meeting has been saved
+    /// </summary>
+    /// <returns>Meeting List</returns>
+    | MeetingSaved (Error msg) ->
+        {model with Errors = [msg]}, Cmd.none
 
     /// <summary>
     /// Get the Selected Meeting from Storage (Possible todo: Get DB info)
@@ -142,11 +147,11 @@ let update msg model =
         { model with DurationInput = value}, Cmd.none
 
     /// <summary>
-    /// Save the Meeting???
+    /// Save the Meeting
     /// </summary>
     /// <returns>???</returns>
-    | SaveMeeting request ->
-        model, saveMeeting request
+    | SaveMeeting ->
+        model, saveMeeting {Title = model.TitleInput; Start = DateTime.Parse model.StartInput; Duration = TimeSpan.FromMinutes (float model.DurationInput)}
 
     /// <summary>
     /// Get any errors found in the system
@@ -259,8 +264,9 @@ let meetForm model dispatch =
                     // Form submit can't work so the use of Button needs to be used 
                     button [
                         Class "btn btn-success"
-                        OnClick (fun e -> printf "%s" (e.initEvent.ToString()))
-                        // OnClick (fun e -> dispatch (saveMeeting e.Value))
+                        // OnClick (fun e -> printf "%s" (e.initEvent.ToString()); 
+                        // )
+                        OnClick (fun e -> dispatch SaveMeeting)
                         ] [                        // Type "submit"
                         str "Submit"
                         //

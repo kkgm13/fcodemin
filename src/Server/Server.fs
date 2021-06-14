@@ -12,15 +12,18 @@ open Shared
 type Storage () =
     // Storage Faker Arrays
     let meetings = ResizeArray<_>()
-    // Getter
+    // Meeting Getter (equiv of index-list)
     member __.GetMeetings () =
         List.ofSeq meetings
-    // Adder
+    // Meeting Add (equiv of CRUD create/store)
     member __.AddMeeting (meet : Meeting) =
         // Check for multiple
+        printf "%A" meet // %A = Any Fsharp Obj
         if Meeting.isValid meet then
-            meetings.Add meet
-            Ok()
+            // if Meeting.conflict meet then
+                meetings.Add meet
+                Ok meet
+            // else Error "Meeting Conflicted"
         else Error "Invalid Meeting"
 
 // Storage Template
@@ -46,23 +49,23 @@ storage.AddMeeting(Meeting.create "Event Negative 1" (DateTime(2021,04,16,15,0,0
 storage.AddMeeting(Meeting.create "Event Negative 2" (DateTime(2021,07,16,15,0,0)) (TimeSpan.FromHours(1.0)) ) |> ignore 
 
 let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext?
-    let ats = ctx.GetFormValue.ToString()
-    // printfn ats
-    let! meeting = ctx.BindFormAsync<SaveMeetingRequest>() // Aids with DateTime
+    // let ats = ctx.GetFormValue.ToString()
+    // // printfn ats
+    let! meeting = ctx.BindJsonAsync<SaveMeetingRequest>() // Aids with DateTime
     // do! Database.addMeeting meeting // Database giving issues despite from Giraffe accoding to docs
-    storage.AddMeeting(Meeting.create meeting.Title meeting.Start meeting.Duration) |> ignore
-    return! Successful.OK "Saved Meeting" next ctx
+    let x = storage.AddMeeting(Meeting.create meeting.Title meeting.Start meeting.Duration)
+    return! Successful.OK x next ctx
 }
 
 let webApp =
     router {
         // pipe_through headerPipe
-        not_found_handler (text "404") // Not Hound Handler
+        // not_found_handler (text "404") // Not Hound Handler
 
         get Route.hello (json "Hello World")
         get Route.meeting (json (storage.GetMeetings()))    // Index Callout
         getf "/api/meeting/%s" loadMeeting              // Show? Callout?
-        post Route.meeting saveMeeting                      // Create Callout
+        post "/api/meeting-sent" saveMeeting                      // Create Callout
     }
 
 

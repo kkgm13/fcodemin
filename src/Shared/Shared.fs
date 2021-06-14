@@ -35,7 +35,7 @@ module Meeting =
         // If null or whitespace only
         String.IsNullOrEmpty meet.Title ||
         // If meeting date and time compared is anything greater than the current time
-         DateTime.Compare(meet.Start,DateTime.Now) < 0
+        DateTime.Compare(meet.Start,DateTime.Now) < 0
         // If an existing
                         ) |> not
         
@@ -48,6 +48,9 @@ module Meeting =
             Duration = duration
         }
 
+    // let conflict meet = 
+    //     match meet with
+            
     // Conflict Checker
     // let conflict m1 m2 = 
     //     match m1 with 
