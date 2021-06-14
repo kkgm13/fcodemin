@@ -48,9 +48,9 @@ module Meeting =
             Duration = duration
         }
 
-    // let conflict meet = 
+    let conflict meet = 
     //     match meet with
-            
+            null
     // Conflict Checker
     // let conflict m1 m2 = 
     //     match m1 with 
