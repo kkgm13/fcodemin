@@ -1,5 +1,4 @@
 namespace Shared
-
 open System
 
 /////////////////////////////
@@ -22,21 +21,33 @@ type Meeting =
         // Start var is between any Start var and subsequent durations
         else None
 
-// type Schedule =
-//     | Once of DateTime * TimeSpan
-//     | Repeatedly of DateTime * TimeSpan * TimeSpan
+// Alternate for Repeating Meetings
+type Schedule =
+    | Once of DateTime * TimeSpan
+    | Repeatedly of DateTime * TimeSpan * TimeSpan
 
+// type MeetingV2 = 
+//     {
+//         Id : Guid
+//         Title : string
+//         Schedule : Schedule
+//     }
+//     // Model Validations
+//     member this.HasErrors() =
+//         // Title Var is Empty
+//         if this.Title.Length = 0 then Some "No Meeting Title Provided."
+//         // Start var is between any Start var and subsequent durations
+//         else None
 //////////////////////////////////
 /// Meeting Module for specific functions
 //////////////////////////////////
-module Meeting = 
+module MeetingV1 = 
     // Validator Method
     let isValid meet  = (
         // If null or whitespace only
         String.IsNullOrEmpty meet.Title ||
         // If meeting date and time compared is anything greater than the current time
         DateTime.Compare(meet.Start,DateTime.Now) < 0
-        // If an existing
                         ) |> not
         
     // Add/Create method
@@ -48,18 +59,38 @@ module Meeting =
             Duration = duration
         }
 
-    let conflict meet = 
-    //     match meet with
-            null
-    // Conflict Checker
-    // let conflict m1 m2 = 
-    //     match m1 with 
-    //     | Once(start1, length1)->
-    //         match m2 with
-    //         Once(start2, length2) ->
-    //             false
-    //     | Repeatedly(start1, length1, repetition1)->
-    //         failwith "Unable to provide meeting"
+
+    let conflict m1 m2 = 
+        // false
+        // match m1 with 
+        // // 1) Meeting overlaps with beginning
+        if DateTime.Equals(m1.Start, m2.Start) || DateTime.Compare(m1.Start, m2.Start) > 0 then
+            false
+        else true
+        
+                
+            // | 
+
+
+        // 2) Meeting overlaps at the end
+            // local variable
+        // 3) Meeting overlaps in side a meeting
+        // 4) Meeting is the exact timeframe
+            // | DateTime.Equals(m1.Start, m2.Start)
+                    // false
+            // | conflict meet m2
+
+        // match m1 with 
+        //     | Once(start1, length1)->
+        //         match m2 with
+        //         Once(start2, length2) ->
+        //             false // Start here
+        //         | Repeatedly(start2, length2, repitition2) ->
+        //             false
+        //     | Repeatedly(start1, length1, repetition1)->
+        //         failwith "Unable to provide meeting"
+    let conflictAny meet meetList =
+        List.exists (fun e -> conflict meet e) meetList
 
 //////////////////////////////////
 ///  Routes for Server
