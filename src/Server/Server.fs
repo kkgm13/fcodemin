@@ -19,7 +19,7 @@ type Storage () =
     member __.AddMeeting (meet : Meeting) =
         // Check for multiple
         printf "%A" meet // %A = Any Fsharp Obj
-        if Meeting.isValid meet then
+        if Meeting.isValid meet && Meeting.conflictAny meet (Meeting.GetMeetings()) then
             // if Meeting.conflict meet then
                 meetings.Add meet
                 Ok meet

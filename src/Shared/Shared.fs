@@ -41,7 +41,7 @@ type Schedule =
 //////////////////////////////////
 /// Meeting Module for specific functions
 //////////////////////////////////
-module MeetingV1 = 
+module Meeting = 
     // Validator Method
     let isValid meet  = (
         // If null or whitespace only
