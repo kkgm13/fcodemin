@@ -66,8 +66,6 @@ let init() =
     // Get List Information Passed
     let cmd2 = Cmd.OfPromise.either loadMeetings () LoadMeetings GotError
     model, Cmd.batch([cmd1 ; cmd2])
-    
-let sayHello name = $"Hello {name}"
 
 // Load a single Meeting
 let loadMeeting meetId =

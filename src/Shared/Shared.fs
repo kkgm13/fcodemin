@@ -98,6 +98,7 @@ module Meeting =
 module Route =
     let hello = "/api/hello"
     let meeting = "/api/meetings"
+    let hellos = "/api/hellos"
     // let meetSelect = "/api/meetings/"
 
 //////////////////////////////////

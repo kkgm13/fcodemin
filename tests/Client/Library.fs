@@ -1,25 +1,25 @@
-﻿// namespace Client.Tests
+﻿namespace Client.Tests
 
-// module Say =
-//     let hello name =
-//         printfn "Hello %s" name
+module Say =
+    let hello name =
+        printfn "Hello %s" name
 
-module Tests
+// module Tests
 
-open Fable.Mocha
+// open Fable.Mocha
 
-let client = testList "Client" [
-    testCase "Hello received" <| fun _ ->
-        let hello = Index.sayHello "SAFE V3"
+// let client = testList "Client" [
+//     testCase "Hello received" <| fun _ ->
+//         let hello = Client.sayHello "SAFE V3"
 
-        Expect.equal hello "Hello SAFE V3" "Unexpected greeting"
-]
+//         Expect.equal hello "Hello SAFE V3" "Unexpected greeting"
+// ]
 
-let all =
-    testList "All"
-        [
-            client
-        ]
+// let all =
+//     testList "All"
+//         [
+//             client
+//         ]
 
-[<EntryPoint>]
-let main _ = Mocha.runTests all
+// [<EntryPoint>]
+// let main _ = Mocha.runTests all

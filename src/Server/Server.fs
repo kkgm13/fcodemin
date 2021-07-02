@@ -19,7 +19,9 @@ type Storage () =
     member __.AddMeeting (meet : Meeting) =
         // Check for multiple
         printf "%A" meet // %A = Any Fsharp Obj
-        if Meeting.isValid meet && Meeting.conflictAny meet (Meeting.GetMeetings()) then
+        if Meeting.isValid meet then
+        // && Meeting.conflictAny meet (Meeting.GetMeetings()) 
+            
             // if Meeting.conflict meet then
                 meetings.Add meet
                 Ok meet
@@ -56,12 +58,13 @@ let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext
     let x = storage.AddMeeting(Meeting.create meeting.Title meeting.Start meeting.Duration)
     return! Successful.OK x next ctx
 }
+let getMessage () = "Hello from SAFE!"     
 
 let webApp =
     router {
         // pipe_through headerPipe
         // not_found_handler (text "404") // Not Hound Handler
-
+        get Route.hellos (getMessage () |> json )
         get Route.hello (json "Hello World")
         get Route.meeting (json (storage.GetMeetings()))    // Index Callout
         getf "/api/meeting/%s" loadMeeting              // Show? Callout?
