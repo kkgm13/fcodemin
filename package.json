@@ -2,6 +2,7 @@
     "private": true,
     "scripts": {
         "start": "webpack-dev-server",
+        "test": "webpack-dev-server --config webpack.tests.config",
         "build": "webpack -p"
     },
     "devDependencies": {

@@ -5,6 +5,8 @@ open Thoth.Fetch
 open Shared
 open System
 
+let sayHello s = "Hi " + s
+
 //////////////////////////////////////
 /// Default Model Instance Type
 //////////////////////////////////////
