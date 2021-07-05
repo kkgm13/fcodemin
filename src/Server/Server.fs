@@ -21,8 +21,7 @@ type Storage () =
         printf "%A" meet // %A = Any Fsharp Obj
         if Meeting.isValid meet then
         // && Meeting.conflictAny meet (Meeting.GetMeetings()) 
-            
-            // if Meeting.conflict meet then
+            // if Meeting.conflictAny meet [] then
                 meetings.Add meet
                 Ok meet
             // else Error "Meeting Conflicted"

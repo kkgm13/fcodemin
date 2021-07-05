@@ -59,26 +59,17 @@ module Meeting =
             Duration = duration
         }
 
-
+    ///<summary>
+    /// Meeting Conflict Checker
+    /// </summary>
+    /// <returns>True for any conflicts; else false</returns>
     let conflict m1 m2 = 
         // false
         // match m1 with 
         // // 1) Meeting overlaps with beginning
-        if DateTime.Equals(m1.Start, m2.Start) || DateTime.Compare(m1.Start, m2.Start) > 0 then
+        if DateTime.Equals(m1.Start, m2.Start) || DateTime.Compare(m1.Start, m2.Start) > 0 || DateTime.Compare(m1.Start.Add(m1.Duration),m2.Start) < 0 then
             false
         else true
-        
-                
-            // | 
-
-
-        // 2) Meeting overlaps at the end
-            // local variable
-        // 3) Meeting overlaps in side a meeting
-        // 4) Meeting is the exact timeframe
-            // | DateTime.Equals(m1.Start, m2.Start)
-                    // false
-            // | conflict meet m2
 
         // match m1 with 
         //     | Once(start1, length1)->
@@ -89,6 +80,7 @@ module Meeting =
         //             false
         //     | Repeatedly(start1, length1, repetition1)->
         //         failwith "Unable to provide meeting"
+      
     let conflictAny meet meetList =
         List.exists (fun e -> conflict meet e) meetList
 
