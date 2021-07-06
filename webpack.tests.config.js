@@ -1,3 +1,11 @@
+// Template for webpack.config.js in Fable projects
+// Find latest version in https://github.com/fable-compiler/webpack-config-template
+
+// In most cases, you'll only need to edit the CONFIG object (after dependencies)
+// See below if you need better fine-tuning of Webpack options
+
+// Dependencies. Also required: core-js, @babel/core,
+// @babel/preset-env, babel-loader, sass, sass-loader, css-loader, style-loader, file-loader, resolve-url-loader
 var path = require('path');
 var { HotModuleReplacementPlugin } = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -49,7 +57,6 @@ var devServer = {
         }
     }
 };
-
 // If we're running the webpack-dev-server, assume we're in development mode
 var isProduction = !process.argv.find(v => v.indexOf('webpack-dev-server') !== -1);
 var environment = isProduction ? 'production' : 'development';

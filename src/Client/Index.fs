@@ -69,6 +69,9 @@ let init() =
     let cmd2 = Cmd.OfPromise.either loadMeetings () LoadMeetings GotError
     model, Cmd.batch([cmd1 ; cmd2])
 
+let sayHello name = sprintf "Hello %s" name
+// let sayHello name = $"Hello {name}"
+
 // Load a single Meeting
 let loadMeeting meetId =
     let loadMeeting () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%s" meetId)
