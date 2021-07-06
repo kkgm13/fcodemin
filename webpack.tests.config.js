@@ -7,95 +7,87 @@
 // Dependencies. Also required: core-js, @babel/core,
 // @babel/preset-env, babel-loader, sass, sass-loader, css-loader, style-loader, file-loader, resolve-url-loader
 var path = require('path');
-var webpack = require('webpack');
+var { HotModuleReplacementPlugin } = require('webpack');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
 
-var CONFIG = {
-    // The tags to include the generated JS and CSS will be automatically injected in the HTML template
-    // See https://github.com/jantimon/html-webpack-plugin
-    indexHtmlTemplate: 'tests/Client/index.html',
-    fsharpEntry: 'tests/Client/Library.fs.js',
-    outputDir: 'tests/Client',
-    assetsDir: 'tests/Client',
-    devServerPort: 8081,
-    // When using webpack-dev-server, you may need to redirect some calls
-    // to a external API server. See https://webpack.js.org/configuration/dev-server/#devserver-proxy
-    devServerProxy: undefined,
-    babel: undefined
+function resolve(filePath) {
+    return path.join(__dirname, filePath);
 }
 
+// The HtmlWebpackPlugin allows us to use a template for the index.html page
+// and automatically injects <script> or <link> tags for generated bundles.
+var htmlPlugin =
+    new HtmlWebpackPlugin({
+        filename: 'index.html',
+        template: resolve('./tests/Client/index.html')
+    });
+
+// Copies static assets to output directory
+var copyPlugin =
+    new CopyWebpackPlugin({
+        patterns: [{
+            from: resolve('./tests/Client/public')
+        }]
+    });
+
+// Enables hot reloading when code changes without refreshing
+var hmrPlugin =
+    new HotModuleReplacementPlugin();
+
+// Configuration for webpack-dev-server
+var devServer = {
+    publicPath: '/',
+    contentBase: resolve('./tests/Client/public'),
+    host: '0.0.0.0',
+    port: 8081,
+    hot: true,
+    inline: true,
+    proxy: {
+        // Redirect requests that start with /api/ to the server on port 8085
+        '/api/**': {
+            target: 'http://localhost:8085',
+            changeOrigin: true
+        },
+        // Redirect websocket requests that start with /socket/ to the server on the port 8085
+        // This is used by Hot Module Replacement
+        '/socket/**': {
+            target: 'http://localhost:8085',
+            ws: true
+        }
+    }
+};
 // If we're running the webpack-dev-server, assume we're in development mode
 var isProduction = !process.argv.find(v => v.indexOf('webpack-dev-server') !== -1);
 var environment = isProduction ? 'production' : 'development';
 process.env.NODE_ENV = environment;
 console.log('Bundling for ' + environment + '...');
 
-// The HtmlWebpackPlugin allows us to use a template for the index.html page
-// and automatically injects <script> or <link> tags for generated bundles.
-var commonPlugins = [
-    new HtmlWebpackPlugin({
-        filename: 'index.html',
-        template: resolve(CONFIG.indexHtmlTemplate)
-    })
-];
-
 module.exports = {
-    // In development, split the JavaScript and CSS files in order to
-    // have a faster HMR support. In production bundle styles together
-    // with the code because the MiniCssExtractPlugin will extract the
-    // CSS in a separate files.
-    entry: {
-        app: resolve(CONFIG.fsharpEntry)
-    },
-    // Add a hash to the output file name in production
-    // to prevent browser caching if code changes
-    output: {
-        path: resolve(CONFIG.outputDir),
-        filename: isProduction ? '[name].[hash].js' : '[name].js'
-    },
+    entry: { app: resolve('./tests/Client/Client.Tests.fsproj') },
+    output: { path: resolve('./deploy/public') },
+    resolve: { symlinks: false }, // See https://github.com/fable-compiler/Fable/issues/1490
     mode: isProduction ? 'production' : 'development',
-    devtool: isProduction ? 'source-map' : 'eval-source-map',
-    optimization: {
-        splitChunks: {
-            chunks: 'all'
-        },
-    },
-    // Besides the HtmlPlugin, we use the following plugins:
-    // PRODUCTION
-    //      - MiniCssExtractPlugin: Extracts CSS from bundle to a different file
-    //          To minify CSS, see https://github.com/webpack-contrib/mini-css-extract-plugin#minimizing-for-production
-    //      - CopyWebpackPlugin: Copies static assets to output directory
-    // DEVELOPMENT
-    //      - HotModuleReplacementPlugin: Enables hot reloading when code changes without refreshing
-    plugins: isProduction ?
-        commonPlugins.concat([
-            new CopyWebpackPlugin({ patterns: [{ from: resolve(CONFIG.assetsDir) }] }),
-        ])
-        : commonPlugins.concat([
-            new webpack.HotModuleReplacementPlugin(),
-        ]),
-    resolve: {
-        // See https://github.com/fable-compiler/Fable/issues/1490
-        symlinks: false
-    },
-    // Configuration for webpack-dev-server
-    devServer: {
-        publicPath: '/',
-        contentBase: resolve(CONFIG.assetsDir),
-        host: '0.0.0.0',
-        port: CONFIG.devServerPort,
-        proxy: CONFIG.devServerProxy,
-        hot: true,
-        inline: true
-    },
+    plugins: isProduction ? [htmlPlugin, copyPlugin] : [htmlPlugin, hmrPlugin],
+    optimization: { splitChunks: { chunks: 'all' } },
+    devServer: devServer,
     module: {
         rules: [
-
+            {
+                // transform F# into JS
+                test: /\.fs(x|proj)?$/,
+                use: { loader: 'fable-loader' }
+            },
+            {
+                // transform JS to old syntax (compatible with old browsers)
+                test: /\.js$/,
+                exclude: /node_modules/,
+                use: { loader: 'babel-loader' },
+            },
+            {
+                test: /\.(sass|scss|css)$/,
+                use: ['style-loader', 'css-loader', 'sass-loader'],
+            },
         ]
     }
 };
-
-function resolve(filePath) {
-    return path.isAbsolute(filePath) ? filePath : path.join(__dirname, filePath);
-}
