@@ -5,8 +5,6 @@ open Thoth.Fetch
 open Shared
 open System
 
-let sayHello s = "Hi " + s
-
 //////////////////////////////////////
 /// Default Model Instance Type
 //////////////////////////////////////
@@ -69,8 +67,8 @@ let init() =
     let cmd2 = Cmd.OfPromise.either loadMeetings () LoadMeetings GotError
     model, Cmd.batch([cmd1 ; cmd2])
 
-let sayHello name = sprintf "Hello %s" name
-// let sayHello name = $"Hello {name}"
+// Client Dummy Test
+let sayHello s = "Hi " + s
 
 // Load a single Meeting
 let loadMeeting meetId =
