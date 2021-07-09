@@ -68,7 +68,7 @@ let init() =
     model, Cmd.batch([cmd1 ; cmd2])
 
 // Client Dummy Test
-let sayHello s = "Hi " + s
+let sayHello s = "Hello " + s
 
 // Load a single Meeting
 let loadMeeting meetId =
@@ -190,7 +190,7 @@ let meetList model =
         ul [ Style [TextAlign TextAlignOptions.Left;] ] [
             // Loop around the Meetings list collection on view
             for meet in model.Meetings do
-                li [OnMouseEnter (fun _ -> ())] [ str meet.Title ]
+                li [] [ str meet.Title ]
                 ul [ Style [TextAlign TextAlignOptions.Left;] ] [
                     li [] [ str (meet.Start.ToLocalTime().ToString()) ]
                     li [] [ str (meet.Duration.ToString())]

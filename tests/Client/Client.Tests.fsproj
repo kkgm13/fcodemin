@@ -1,20 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project Sdk="Microsoft.NET.Sdk">
-    <PropertyGroup>
-        <TargetFramework>netcoreapp3.1</TargetFramework>
-        <DefineConstants>FABLE_COMPILER</DefineConstants>
-    </PropertyGroup>
-    <ItemGroup>
-        <None Include="index.html" />
-        <Compile Include="App.fs" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\Shared\Shared.fsproj" />
-        <ProjectReference Include="..\..\src\Client\Client.fsproj" />
-    </ItemGroup>
-    <ItemGroup>
-    </ItemGroup>
-    <ItemGroup>
-      <PackageReference Include="Fable.Mocha" Version="2.10.0" />
-    </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <DefineConstants>FABLE_COMPILER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="index.html" />
+    <Compile Include="Library.fs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\Client\Client.fsproj" />
+    <ProjectReference Include="..\Shared\Shared.fsproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Fable.Mocha" Version="2.10.0" />
+  </ItemGroup>
+
 </Project>

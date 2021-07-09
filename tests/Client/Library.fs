@@ -15,6 +15,13 @@ let client = testList "Client" [
         Expect.equal hello "Hello SAFE V3" "Unexpected greeting"
 ]
 
+// let presentList = testList "Client" [
+//     testCase "List Inputted" <| fun _ ->
+//         let list = Index.loadMeeting null
+
+//         Expect.equal list "No List Found"
+// ]
+
 let all =
     testList "All"
         [
