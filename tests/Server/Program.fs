@@ -13,6 +13,8 @@ let server = testList "Server" [
         let expectedResult = "Hello from SAFE!"        
         let result = Server.getMessage()
         Expect.equal result expectedResult "Result should be ok"
+
+    testCase "Meeting Added" <| fun _
 ]
 
 [<EntryPoint>]

@@ -13,6 +13,10 @@ let client = testList "Client" [
         let hello = Index.sayHello "SAFE V3"
 
         Expect.equal hello "Hello SAFE V3" "Unexpected greeting"
+    testCase "Fetched List of Meetings" <| fun _ ->
+        let nt = null
+
+        Expect.equal nt null "Not null"
 ]
 
 // let presentList = testList "Client" [
