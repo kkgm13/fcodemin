@@ -35,28 +35,29 @@ let loadMeeting (meetId: string) next ctx = task {
     let meet = {
             Id = Guid.Parse(meetId)
             Title = "Event 1"
-            Start = (DateTime(2021,07,16,15,0,0))
-            Duration = (TimeSpan.FromHours(1.0))
+            // Start = (DateTime(2021,07,16,15,0,0))
+            // Duration = (TimeSpan.FromHours(1.0))
+            Schedule = Once(DateTime(2021,07,16,15,0,0), TimeSpan.FromHours(1.0))
         }
     return! json meet next ctx
 }
 
 // Faking Data
-storage.AddMeeting(Meeting.create "Event 1" (DateTime(2022,03,16,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore 
-storage.AddMeeting(Meeting.create "Event 2" (DateTime(2021,10,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
-storage.AddMeeting(Meeting.create "Event 3" (DateTime(2021,11,29,15,0,0)) (TimeSpan.FromHours(1.0))) |> ignore
-// This should be illegal after a certain time
-storage.AddMeeting(Meeting.create "Event Negative 1" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0)) ) |> ignore 
-storage.AddMeeting(Meeting.create "Event Negative 2" (DateTime(2021,07,16,15,0,0)) (TimeSpan.FromHours(1.0)) ) |> ignore 
+storage.AddMeeting(Meeting.create "Event 1" (Once(DateTime(2022,03,16,15,0,0), TimeSpan.FromHours(1.0)))) |> ignore 
+storage.AddMeeting(Meeting.create "Event 2" (Once(DateTime(2021,10,29,15,0,0), TimeSpan.FromHours(1.0)))) |> ignore
+storage.AddMeeting(Meeting.create "Event 3" (Repeatedly(DateTime(2021,11,29,15,0,0), TimeSpan.FromHours(1.0) , TimeSpan.FromDays(7.0)))) |> ignore
+// // This should be illegal after a certain time
+// storage.AddMeeting(Meeting.create "Event Negative 1" (DateTime(2021,04,16,15,0,0)) (TimeSpan.FromHours(1.0)) ) |> ignore 
+// storage.AddMeeting(Meeting.create "Event Negative 2" (DateTime(2021,07,16,15,0,0)) (TimeSpan.FromHours(1.0)) ) |> ignore 
 
-let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext?
-    // let ats = ctx.GetFormValue.ToString()
-    // // printfn ats
-    let! meeting = ctx.BindJsonAsync<SaveMeetingRequest>() // Aids with DateTime
-    // do! Database.addMeeting meeting // Database giving issues despite from Giraffe accoding to docs
-    let x = storage.AddMeeting(Meeting.create meeting.Title meeting.Start meeting.Duration)
-    return! Successful.OK x next ctx
-}
+// let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext?
+//     // let ats = ctx.GetFormValue.ToString()
+//     // // printfn ats
+//     let! meeting = ctx.BindJsonAsync<SaveMeetingRequest>() // Aids with DateTime
+//     // do! Database.addMeeting meeting // Database giving issues despite from Giraffe accoding to docs
+//     let x = storage.AddMeeting(Meeting.create meeting.Title meeting.Schedule)
+//     return! Successful.OK x next ctx
+// }
 let getMessage () = "Hello from SAFE!"     
 
 let webApp =
@@ -67,7 +68,7 @@ let webApp =
         get Route.hello (json "Hello World")
         get Route.meeting (json (storage.GetMeetings()))    // Index Callout
         getf "/api/meeting/%s" loadMeeting              // Show? Callout?
-        post "/api/meeting-sent" saveMeeting                      // Create Callout
+        // post "/api/meeting-sent" saveMeeting                      // Create Callout
     }
 
 

@@ -22,8 +22,7 @@ let client = testList "Client" [
 
         "input[name=Title]" << expTitleName
 
-        let expTitle = someElement exp
-        Expect.equal expTitle "Meeting Testing" "Unexpected"
+        Expect.equal expTitleName "Meeting Testing" "Unexpected"
 ]
 
 let all =

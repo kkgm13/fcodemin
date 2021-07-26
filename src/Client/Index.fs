@@ -16,6 +16,8 @@ type Model =
         TitleInput: string       // Input Setter
         StartInput: string       // Input Setter
         DurationInput: int       // Input Setter
+        RepeatValInput: string     // Input Setter
+        RepetitionInput: int    // Input Setter
         Errors: string list // Server Error Handler
         TheMeeting: Meeting option
     }
@@ -33,6 +35,8 @@ type Msg =
     | SetTitleInput of string            // HTML Title input
     | SetStartInput of string            // HTML DateTime input
     | SetDurationInput of int            // HTML Number input
+    | SetRepetitionInput of int            // HTML Number input
+    | SetRepeatValInput of string            // HTML Number input
     // Sending to Server
     | SaveMeeting                   // Save Meeting
     | MeetingSaved of Result<Meeting,string>           // Meeting Saved
@@ -50,6 +54,8 @@ let init() =
             TitleInput = ""         // Title Input
             StartInput = ""         // Start Input
             DurationInput = 0       // Duration Input
+            RepetitionInput = 0       // Duration Input
+            RepeatValInput = ""
             Meetings = []           // Blank Meetings Data
             Errors = []             // Blank Errors
             TheMeeting = None       // Blank Meeting data?
@@ -151,6 +157,14 @@ let update msg model =
         { model with DurationInput = value}, Cmd.none
 
     /// <summary>
+    /// Print the Value for Duration
+    /// </summary>
+    /// <returns>HTML Input Value for Title</returns>
+    | SetRepetitionInput value ->
+        printfn "Value for Input: %s" (model.RepetitionInput.ToString()) // Debug to the Browser Console
+        { model with RepetitionInput = value}, Cmd.none
+
+    /// <summary>
     /// Save the Meeting
     /// </summary>
     /// <returns>???</returns>
@@ -193,8 +207,12 @@ let meetList model =
             for meet in model.Meetings do
                 li [] [ str meet.Title ]
                 ul [ Style [TextAlign TextAlignOptions.Left;] ] [
-                    li [] [ str (meet.Start.ToLocalTime().ToString()) ]
-                    li [] [ str (meet.Duration.ToString())]
+                    // if meet.Schedule.Equals "Once" then
+                    li [] [str (meet.Schedule.ToString())]
+                    // else 
+
+                    // li [] [ str (meet.Schedule.ToLocalTime().ToString()) ]
+                //     li [] [ str (meet.Schedule.Tail.ToString())]
                     li [] [ str (meet.Id.ToString())]
                 ]
         ]
@@ -228,6 +246,19 @@ let meetForm model dispatch =
                     OnChange (fun e -> dispatch(SetTitleInput((e.target :?> Browser.Types.HTMLInputElement).value)))
                 ]
             ]
+            // Repeated Schedule
+            div [ Class "form-check mb-3" ][
+                input [ 
+                    Class "form-check-input"
+                    Type "checkbox"
+                    Value "" // Must not contain a value due to HTML structure
+                    Id "flexCheckDefault" 
+                    OnChange (fun e -> dispatch(SetRepeatValInput((e.target:?> Browser.Types.HTMLInputElement).value)))
+                ]
+                label [ HTMLAttr.Custom ("for", "flexCheckDefault")
+                        Class "form-check-label" ]
+                    [ str "Repeated Meeting?" ] 
+            ]
             div [ Class "mb-3" ][
                 // Date Creation
                 label [ HTMLAttr.Custom ("for", "Start") 
@@ -260,6 +291,26 @@ let meetForm model dispatch =
                     OnChange (fun e -> dispatch(SetDurationInput(int (e.target :?> Browser.Types.HTMLInputElement).value)))
                     // Disabled true
                 ]
+            ]
+            div [ Class "mb-3" ][
+                // Duration Creation
+                label [ HTMLAttr.Custom ("for", "repetition") 
+                        Class "form-label" ][ str "Meeting Repetiton Duration: (Days)" ]
+                    // Number Input
+                input [ 
+                    Value model.DurationInput
+                    Type "number"
+                    Id "Repetition"
+                    Name "Repetition"
+                    Placeholder "Repetition Duration (Days)" 
+                    Min 1
+                    Class "form-control"
+                    OnChange (fun e -> dispatch(SetRepetitionInput(int (e.target :?> Browser.Types.HTMLInputElement).value)))
+                    // Disabled true
+                ]
+                div [ Id "repetitionHelp"
+                      Class "form-text" ]
+                    [ str "eg: Weekly Repetition is 7 Days" ]
             ]
             // Input Submit / Reset
             hr []

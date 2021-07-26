@@ -55,15 +55,13 @@ module Meeting =
                         ) |> not
         
     // Add/Create method
-    let create title start duration  = 
+    let create title schedule  = 
         {
             Id = Guid.NewGuid()
             Title = title
             // Start = start
             // Duration = duration
-            Schedule = (
-                start * duration // Check with 0
-            )
+            Schedule = schedule
         }
 
     ///<summary>
@@ -71,6 +69,7 @@ module Meeting =
     /// </summary>
     /// <returns>True for any conflicts; else false</returns>
     let conflict m1 m2 = 
+        // Old version 
         // false
         // match m1 with 
         // // 1) Meeting overlaps with beginning
