@@ -6,6 +6,8 @@
 // let main argv =
 //     printfn "Hello World from F#!"
 //     0 // return an integer exit code
+module Test
+
 open Expecto
 
 let server = testList "Server" [
@@ -14,8 +16,12 @@ let server = testList "Server" [
         let result = Server.getMessage()
         Expect.equal result expectedResult "Result should be ok"
 
-    testCase "Meeting Added" <| fun _
+    testCase "Meeting List grabbed" <| fun _ ->
+        let expected = []
+        let result = []
+        Expect.equal result expected "Meeting can be grabbed"
 ]
 
 [<EntryPoint>]
 let main _ = runTests defaultConfig server
+//Run: dotnet run -p tests/Server

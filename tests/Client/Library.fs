@@ -13,18 +13,18 @@ let client = testList "Client" [
         let hello = Index.sayHello "SAFE V3"
 
         Expect.equal hello "Hello SAFE V3" "Unexpected greeting"
-    testCase "Fetched List of Meetings" <| fun _ ->
-        let nt = null
+    // testCase "Fetched List of Meetings" <| fun _ ->
+    //     let nt = null
 
-        Expect.equal nt null "Not null"
+        // Expect.equal nt null "Not null"
+    testCase "Detected Info In Title" <| fun _ ->
+        let expTitleName = "Meeting Testing"
+
+        "input[name=Title]" << expTitleName
+
+        let expTitle = someElement exp
+        Expect.equal expTitle "Meeting Testing" "Unexpected"
 ]
-
-// let presentList = testList "Client" [
-//     testCase "List Inputted" <| fun _ ->
-//         let list = Index.loadMeeting null
-
-//         Expect.equal list "No List Found"
-// ]
 
 let all =
     testList "All"
@@ -34,3 +34,4 @@ let all =
 
 [<EntryPoint>]
 let main _ = Mocha.runTests all
+// Run: npm test

@@ -103,6 +103,7 @@ let update msg model =
     /// <returns>Meeting List</returns>
     | MeetingSaved (Ok meet) ->
         { model with Meetings = model.Meetings @ [ meet ]; Errors = ["Meeting Saved"]}, Cmd.none
+        
     /// <summary>
     /// Confirm Meeting has been saved
     /// </summary>
