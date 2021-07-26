@@ -5,39 +5,43 @@ open System
 ///  Main Shared Object between server and client 
 /// (Meeting Model)
 /////////////////////////////
-type Meeting = 
-    {
-        Id : Guid
-        Title : string
-        Start : DateTime
-        Duration : TimeSpan
-    }
-    // Model Validations
-    member this.HasErrors() =
-        // Title Var is Empty
-        if this.Title.Length = 0 then Some "No Meeting Title Provided."
-        // Start var provided is past the current date & time now
-        else if this.Start.CompareTo(DateTime.Now) > 0 then Some "This meeting can't happen"
-        // Start var is between any Start var and subsequent durations
-        else None
+
+/// Original V1 Meeting
+// type Meeting = 
+//     {
+//         Id : Guid
+//         Title : string
+//         Start : DateTime
+//         Duration : TimeSpan
+//     }
+//     // Model Validations
+//     member this.HasErrors() =
+//         // Title Var is Empty
+//         if this.Title.Length = 0 then Some "No Meeting Title Provided."
+//         // Start var provided is past the current date & time now
+//         else if this.Start.CompareTo(DateTime.Now) > 0 then Some "This meeting can't happen"
+//         // Start var is between any Start var and subsequent durations
+//         else None
 
 // Alternate for Repeating Meetings
 type Schedule =
     | Once of DateTime * TimeSpan
     | Repeatedly of DateTime * TimeSpan * TimeSpan
 
-// type MeetingV2 = 
-//     {
-//         Id : Guid
-//         Title : string
-//         Schedule : Schedule
-//     }
-//     // Model Validations
-//     member this.HasErrors() =
-//         // Title Var is Empty
-//         if this.Title.Length = 0 then Some "No Meeting Title Provided."
-//         // Start var is between any Start var and subsequent durations
-//         else None
+// Version 2 Meetings
+type Meeting = 
+    {
+        Id : Guid
+        Title : string
+        Schedule : Schedule
+    }
+    // Model Validations
+    member this.HasErrors() =
+        // Title Var is Empty
+        if this.Title.Length = 0 then Some "No Meeting Title Provided."
+        // Start var is between any Start var and subsequent durations
+        else None
+
 //////////////////////////////////
 /// Meeting Module for specific functions
 //////////////////////////////////
@@ -45,18 +49,21 @@ module Meeting =
     // Validator Method
     let isValid meet  = (
         // If null or whitespace only
-        String.IsNullOrEmpty meet.Title ||
+        String.IsNullOrEmpty meet.Title
         // If meeting date and time compared is anything greater than the current time
-        DateTime.Compare(meet.Start,DateTime.Now) < 0
+        // DateTime.Compare(meet.Schedule.Start,DateTime.Now) < 0
                         ) |> not
         
     // Add/Create method
-    let create title start duration = 
+    let create title start duration  = 
         {
             Id = Guid.NewGuid()
             Title = title
-            Start = start
-            Duration = duration
+            // Start = start
+            // Duration = duration
+            Schedule = (
+                start * duration // Check with 0
+            )
         }
 
     ///<summary>
@@ -67,19 +74,19 @@ module Meeting =
         // false
         // match m1 with 
         // // 1) Meeting overlaps with beginning
-        if DateTime.Equals(m1.Start, m2.Start) || DateTime.Compare(m1.Start, m2.Start) > 0 || DateTime.Compare(m1.Start.Add(m1.Duration),m2.Start) < 0 then
-            false
-        else true
+        // if DateTime.Equals(m1.Start, m2.Start) || DateTime.Compare(m1.Start, m2.Start) > 0 || DateTime.Compare(m1.Start.Add(m1.Duration),m2.Start) < 0 then
+        //     false
+        // else true
 
-        // match m1 with 
-        //     | Once(start1, length1)->
-        //         match m2 with
-        //         Once(start2, length2) ->
-        //             false // Start here
-        //         | Repeatedly(start2, length2, repitition2) ->
-        //             false
-        //     | Repeatedly(start1, length1, repetition1)->
-        //         failwith "Unable to provide meeting"
+        match m1 with 
+            | Once(start1, length1)->
+                match m2 with
+                Once(start2, length2) ->
+                    false // Start here
+                | Repeatedly(start2, length2, repitition2) ->
+                    false
+            | Repeatedly(start1, length1, repetition1)->
+                failwith "Unable to provide meeting"
       
     let conflictAny meet meetList =
         List.exists (fun e -> conflict meet e) meetList
