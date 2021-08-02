@@ -82,13 +82,14 @@ module Meeting =
         //     false
         // else true
 
-        match m1 with 
+        match m1.Schedule with 
             | Once(start1, length1)->
                 match m2 with
                 Once(start2, length2) ->
-                    false // Start here
+                    // if DateTime.Equals(start1,start2) || DateTime.Compare(start1, start2) > 0 || DateTime.Compare(start1.Add(length1),start2) < 0 then
+                        failwith "Meeting falls under a known meeting at that time"
                 | Repeatedly(start2, length2, repitition2) ->
-                    false
+                    failwith "Meeting falls under a known repeated meeeting"
             | Repeatedly(start1, length1, repetition1)->
                 failwith "Unable to provide meeting"
       

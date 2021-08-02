@@ -10,7 +10,7 @@ open Shared
 
 // Storage Type for Fake Data
 type Storage () =
-    // Storage Faker Arrays
+    // Storage Array
     let meetings = ResizeArray<_>()
     // Meeting Getter (equiv of index-list)
     member __.GetMeetings () =
@@ -20,7 +20,7 @@ type Storage () =
         // Check for multiple
         printf "%A" meet // %A = Any Fsharp Obj
         if Meeting.isValid meet then
-        // && Meeting.conflictAny meet (Meeting.GetMeetings()) 
+            // if Meeting.conflictAny meet (Storage.GetMeetings()) then
             // if Meeting.conflictAny meet [] then
                 meetings.Add meet
                 Ok meet

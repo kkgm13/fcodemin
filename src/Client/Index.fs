@@ -229,7 +229,7 @@ let meetList model =
                             li [] [ str (duration.TotalMinutes .ToString()+" Minutes") ] 
                         | Repeatedly(start, duration, repetition) -> 
                             li [] [ str ("Repeated every " + (repetition.TotalDays.ToString())+" day(s)")] 
-                            li [] [ str (start.ToLongDateString().ToString()) ] 
+                            li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ]  
                             li [] [ str (duration.TotalMinutes.ToString()+" Minutes")] 
                         li [] [ str (meet.Id.ToString())]
                 ]
