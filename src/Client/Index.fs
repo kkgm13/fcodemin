@@ -16,7 +16,7 @@ type Model =
         TitleInput: string       // Input Setter
         StartInput: string       // Input Setter
         DurationInput: int       // Input Setter
-        RepeatValInput: string     // Input Setter
+        RepeatValInput: Boolean     // Input Setter
         RepetitionInput: int    // Input Setter
         Errors: string list // Server Error Handler
         TheMeeting: Meeting option
@@ -36,7 +36,7 @@ type Msg =
     | SetStartInput of string            // HTML DateTime input
     | SetDurationInput of int            // HTML Number input
     | SetRepetitionInput of int            // HTML Number input
-    | SetRepeatValInput of string            // HTML Number input
+    | SetRepeatValInput of Boolean            // HTML Number input
     // Sending to Server
     | SaveMeeting                   // Save Meeting
     | MeetingSaved of Result<Meeting,string>           // Meeting Saved
@@ -55,7 +55,7 @@ let init() =
             StartInput = ""         // Start Input
             DurationInput = 0       // Duration Input
             RepetitionInput = 0       // Duration Input
-            RepeatValInput = ""
+            RepeatValInput = false
             Meetings = []           // Blank Meetings Data
             Errors = []             // Blank Errors
             TheMeeting = None       // Blank Meeting data?
@@ -164,12 +164,27 @@ let update msg model =
         printfn "Value for Input: %s" (model.RepetitionInput.ToString()) // Debug to the Browser Console
         { model with RepetitionInput = value}, Cmd.none
 
+
+    /// <summary>
+    /// Print the Value for Duration
+    /// </summary>
+    /// <returns>HTML Input Value for Title</returns>
+    | SetRepeatValInput value ->
+        printfn "Value for Input: %s" (model.RepeatValInput.ToString()) // Debug to the Browser Console
+        { model with RepeatValInput = value}, Cmd.none
+
     /// <summary>
     /// Save the Meeting
     /// </summary>
     /// <returns>???</returns>
     | SaveMeeting ->
-        model, saveMeeting {Title = model.TitleInput; Start = DateTime.Parse model.StartInput; Duration = TimeSpan.FromMinutes (float model.DurationInput)}
+        let s = if model.RepeatValInput then 
+                    Repeatedly(DateTime.Parse model.StartInput, TimeSpan.FromMinutes (float model.DurationInput), TimeSpan.FromDays (float model.RepetitionInput))
+                else 
+                    Once(DateTime.Parse (model.StartInput), TimeSpan.FromMinutes (float model.DurationInput))
+        model, saveMeeting {
+            Title = model.TitleInput; 
+            Schedule = s}
 
     /// <summary>
     /// Get any errors found in the system
@@ -207,15 +222,19 @@ let meetList model =
             for meet in model.Meetings do
                 li [] [ str meet.Title ]
                 ul [ Style [TextAlign TextAlignOptions.Left;] ] [
-                    // if meet.Schedule.Equals "Once" then
-                    li [] [str (meet.Schedule.ToString())]
-                    // else 
-
-                    // li [] [ str (meet.Schedule.ToLocalTime().ToString()) ]
-                //     li [] [ str (meet.Schedule.Tail.ToString())]
-                    li [] [ str (meet.Id.ToString())]
+                        match meet.Schedule with
+                    // li [] [str (meet.Schedule.ToString())]
+                        | Once(start, duration) -> 
+                            li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ] 
+                            li [] [ str (duration.TotalMinutes .ToString()+" Minutes") ] 
+                        | Repeatedly(start, duration, repetition) -> 
+                            li [] [ str ("Repeated every " + (repetition.TotalDays.ToString())+" day(s)")] 
+                            li [] [ str (start.ToLongDateString().ToString()) ] 
+                            li [] [ str (duration.TotalMinutes.ToString()+" Minutes")] 
+                        li [] [ str (meet.Id.ToString())]
                 ]
         ]
+        /// 
         // Error List (will come out blank, but present an empty array)
         p [] [ 
             for err in model.Errors do
@@ -253,7 +272,7 @@ let meetForm model dispatch =
                     Type "checkbox"
                     Value "" // Must not contain a value due to HTML structure
                     Id "flexCheckDefault" 
-                    OnChange (fun e -> dispatch(SetRepeatValInput((e.target:?> Browser.Types.HTMLInputElement).value)))
+                    OnChange (fun e -> dispatch(SetRepeatValInput((e.target:?> Browser.Types.HTMLInputElement).``checked``))) //Warning will always be here "``_``"
                 ]
                 label [ HTMLAttr.Custom ("for", "flexCheckDefault")
                         Class "form-check-label" ]
@@ -292,13 +311,13 @@ let meetForm model dispatch =
                     // Disabled true
                 ]
             ]
-            div [ Class "mb-3" ][
+            div [ Class "mb-3"; Style [Display (if model.RepeatValInput then DisplayOptions.Block else DisplayOptions.None)] ][
                 // Duration Creation
                 label [ HTMLAttr.Custom ("for", "repetition") 
                         Class "form-label" ][ str "Meeting Repetiton Duration: (Days)" ]
                     // Number Input
                 input [ 
-                    Value model.DurationInput
+                    Value model.RepetitionInput
                     Type "number"
                     Id "Repetition"
                     Name "Repetition"

@@ -6,7 +6,7 @@ open System
 /// (Meeting Model)
 /////////////////////////////
 
-/// Original V1 Meeting
+/// Original V1 Meeting Model
 // type Meeting = 
 //     {
 //         Id : Guid
@@ -28,7 +28,7 @@ type Schedule =
     | Once of DateTime * TimeSpan
     | Repeatedly of DateTime * TimeSpan * TimeSpan
 
-// Version 2 Meetings
+// Version 2 Meeting Module
 type Meeting = 
     {
         Id : Guid
@@ -49,9 +49,14 @@ module Meeting =
     // Validator Method
     let isValid meet  = (
         // If null or whitespace only
-        String.IsNullOrEmpty meet.Title
+        String.IsNullOrEmpty meet.Title ||
         // If meeting date and time compared is anything greater than the current time
-        // DateTime.Compare(meet.Schedule.Start,DateTime.Now) < 0
+        match meet.Schedule with 
+            | Once(start, duration) -> 
+                DateTime.Compare(start,DateTime.Now) < 0
+            | Repeatedly(start, duration, repetition) -> 
+                // Match with other repeated dates
+                DateTime.Compare(start,DateTime.Now) < 0
                         ) |> not
         
     // Add/Create method
@@ -104,6 +109,5 @@ module Route =
 //////////////////////////////////
 type SaveMeetingRequest = {
     Title : string
-    Start : DateTime
-    Duration : TimeSpan
+    Schedule: Schedule
 }
