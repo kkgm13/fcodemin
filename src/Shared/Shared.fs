@@ -23,7 +23,9 @@ open System
 //         // Start var is between any Start var and subsequent durations
 //         else None
 
-// Alternate for Repeating Meetings
+/////////////////////////////
+// Alternate for Repeating Meetings (Schedule Sub Model)
+/////////////////////////////
 type Schedule =
     | Once of DateTime * TimeSpan
     | Repeatedly of DateTime * TimeSpan * TimeSpan
@@ -40,6 +42,7 @@ type Meeting =
         // Title Var is Empty
         if this.Title.Length = 0 then Some "No Meeting Title Provided."
         // Start var is between any Start var and subsequent durations
+        // else if this.Schedule.Start.Compare(DateTime.Now) > 0 
         else None
 
 //////////////////////////////////
@@ -84,14 +87,17 @@ module Meeting =
 
         match m1.Schedule with 
             | Once(start1, length1)->
-                match m2 with
+                match m2.Schedule with
                 Once(start2, length2) ->
                     // if DateTime.Equals(start1,start2) || DateTime.Compare(start1, start2) > 0 || DateTime.Compare(start1.Add(length1),start2) < 0 then
-                        failwith "Meeting falls under a known meeting at that time"
+                        // failwith "Meeting falls under a known meeting at that time"
+                    start2 > start1 && start2 < start1 + length1 
                 | Repeatedly(start2, length2, repitition2) ->
-                    failwith "Meeting falls under a known repeated meeeting"
+                    // failwith "Meeting falls under a known repeated meeeting"
+                    false
             | Repeatedly(start1, length1, repetition1)->
-                failwith "Unable to provide meeting"
+                // failwith "Unable to provide meeting"
+                false
       
     let conflictAny meet meetList =
         List.exists (fun e -> conflict meet e) meetList

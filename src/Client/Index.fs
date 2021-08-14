@@ -157,7 +157,7 @@ let update msg model =
         { model with DurationInput = value}, Cmd.none
 
     /// <summary>
-    /// Print the Value for Duration
+    /// Print the Value for Repeat Duration
     /// </summary>
     /// <returns>HTML Input Value for Title</returns>
     | SetRepetitionInput value ->

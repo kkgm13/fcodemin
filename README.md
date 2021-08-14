@@ -9,6 +9,7 @@ You'll need to install the following pre-requisites in order to build SAFE appli
 * [npm](https://nodejs.org/en/download/) package manager & Node LTS
 
 ## Starting the Application
+#### Both are required to run correctly
 To Start the Server:
 ```bash
 cd src\Server\
@@ -19,6 +20,18 @@ To Start the client:
 ```bash
 npm install    # To get Node-related dependencies
 npm run start
+```
+
+To Run the Client Tests
+```bash
+npm test # A dedicated self-creataed test command via SAFE Stack Docs
+```
+
+To Run the Client Tests
+```bash
+#Assuming that it is on the project root folder
+dotnet run -p tests/Server #Dedicated dotNET test command
+# All results will be via Console
 ```
 
 Open a browser to `http://localhost:8080` to view the site.

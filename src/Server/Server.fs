@@ -11,20 +11,19 @@ open Shared
 // Storage Type for Fake Data
 type Storage () =
     // Storage Array
-    let meetings = ResizeArray<_>()
+    let meetings = ResizeArray<Meeting>()
     // Meeting Getter (equiv of index-list)
     member __.GetMeetings () =
         List.ofSeq meetings
     // Meeting Add (equiv of CRUD create/store)
-    member __.AddMeeting (meet : Meeting) =
+    member x.AddMeeting (meet : Meeting) =
         // Check for multiple
         printf "%A" meet // %A = Any Fsharp Obj
         if Meeting.isValid meet then
-            // if Meeting.conflictAny meet (Storage.GetMeetings()) then
-            // if Meeting.conflictAny meet [] then
+            if not (Meeting.conflictAny meet (x.GetMeetings())) then
                 meetings.Add meet
                 Ok meet
-            // else Error "Meeting Conflicted"
+            else Error "Meeting Conflicted"
         else Error "Invalid Meeting"
 
 // Storage Template
@@ -50,6 +49,9 @@ storage.AddMeeting(Meeting.create "Event 3" (Repeatedly(DateTime(2021,11,29,15,0
 storage.AddMeeting(Meeting.create "Event Negative 1" (Once(DateTime(2021,04,16,15,0,0), TimeSpan.FromHours(1.0)))) |> ignore 
 storage.AddMeeting(Meeting.create "Event Negative 2" (Repeatedly(DateTime(2021,08,16,15,0,0), TimeSpan.FromHours(1.0), TimeSpan.FromDays(3.0)))) |> ignore 
 
+/////////////////////////////
+/// Meeting Saved
+/////////////////////////////
 let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext?
     // let ats = ctx.GetFormValue.ToString()
     // // printfn ats
