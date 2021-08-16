@@ -176,7 +176,6 @@ let update msg model =
     /// <summary>
     /// Save the Meeting
     /// </summary>
-    /// <returns>???</returns>
     | SaveMeeting ->
         let s = if model.RepeatValInput then 
                     Repeatedly(DateTime.Parse model.StartInput, TimeSpan.FromMinutes (float model.DurationInput), TimeSpan.FromDays (float model.RepetitionInput))
@@ -217,6 +216,12 @@ let topSection model =
 let meetList model =
     // Meeting List Variation Section
     div [Class "col-8"] [
+        /// 
+        // Error List (will come out blank, but present an empty array)
+        p [Style [TextAlign TextAlignOptions.Center; FontWeight "bold"]] [ 
+            for err in model.Errors do // Split the array or go in the array
+                str err
+        ]
         ul [ Style [TextAlign TextAlignOptions.Left;] ] [
             // Loop around the Meetings list collection on view
             for meet in model.Meetings do
@@ -228,17 +233,12 @@ let meetList model =
                             li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ] 
                             li [] [ str (duration.TotalMinutes .ToString()+" Minutes") ] 
                         | Repeatedly(start, duration, repetition) -> 
+                        // seq { for i in 0 .. Int32.MaxValue do yield i * 7 }|> Seq.skipWhile (fun n -> n < 1000)|> Seq.take 10
                             li [] [ str ("Repeated every " + (repetition.TotalDays.ToString())+" day(s)")] 
                             li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ]  
                             li [] [ str (duration.TotalMinutes.ToString()+" Minutes")] 
-                        li [] [ str (meet.Id.ToString())]
+                        // li [] [ str (meet.Id.ToString())]
                 ]
-        ]
-        /// 
-        // Error List (will come out blank, but present an empty array)
-        p [] [ 
-            for err in model.Errors do
-                str err
         ]
     ]
 
@@ -291,6 +291,7 @@ let meetForm model dispatch =
                     Placeholder "Meeting Date" 
                     Class "form-control"
                     OnChange (fun e -> dispatch(SetStartInput((e.target :?> Browser.Types.HTMLInputElement).value)))
+                    // Min DateTime.Now()
                     // Disabled true
                 ]
             ]
