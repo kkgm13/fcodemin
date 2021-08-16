@@ -176,7 +176,6 @@ let update msg model =
     /// <summary>
     /// Save the Meeting
     /// </summary>
-    /// <returns>???</returns>
     | SaveMeeting ->
         let s = if model.RepeatValInput then 
                     Repeatedly(DateTime.Parse model.StartInput, TimeSpan.FromMinutes (float model.DurationInput), TimeSpan.FromDays (float model.RepetitionInput))
@@ -228,10 +227,11 @@ let meetList model =
                             li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ] 
                             li [] [ str (duration.TotalMinutes .ToString()+" Minutes") ] 
                         | Repeatedly(start, duration, repetition) -> 
+                        // seq { for i in 0 .. Int32.MaxValue do yield i * 7 }|> Seq.skipWhile (fun n -> n < 1000)|> Seq.take 10
                             li [] [ str ("Repeated every " + (repetition.TotalDays.ToString())+" day(s)")] 
                             li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ]  
                             li [] [ str (duration.TotalMinutes.ToString()+" Minutes")] 
-                        li [] [ str (meet.Id.ToString())]
+                        // li [] [ str (meet.Id.ToString())]
                 ]
         ]
         /// 
@@ -291,6 +291,7 @@ let meetForm model dispatch =
                     Placeholder "Meeting Date" 
                     Class "form-control"
                     OnChange (fun e -> dispatch(SetStartInput((e.target :?> Browser.Types.HTMLInputElement).value)))
+                    // Min DateTime.Now()
                     // Disabled true
                 ]
             ]

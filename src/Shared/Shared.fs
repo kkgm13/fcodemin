@@ -77,28 +77,28 @@ module Meeting =
     /// </summary>
     /// <returns>True for any conflicts; else false</returns>
     let conflict m1 m2 = 
-        // Old version 
-        // false
-        // match m1 with 
-        // // 1) Meeting overlaps with beginning
-        // if DateTime.Equals(m1.Start, m2.Start) || DateTime.Compare(m1.Start, m2.Start) > 0 || DateTime.Compare(m1.Start.Add(m1.Duration),m2.Start) < 0 then
-        //     false
-        // else true
-
         match m1.Schedule with 
             | Once(start1, length1)->
                 match m2.Schedule with
                 Once(start2, length2) ->
-                    // if DateTime.Equals(start1,start2) || DateTime.Compare(start1, start2) > 0 || DateTime.Compare(start1.Add(length1),start2) < 0 then
                         // failwith "Meeting falls under a known meeting at that time"
-                    start2 > start1 && start2 < start1 + length1 
+                        // start2 starts after start1 & start2 starts before start1 and its length
+                    start2 > start1 && start2 < start1 + length1 || start2 + length2 > start1 && start2 < start1 + length1
                 | Repeatedly(start2, length2, repitition2) ->
                     // failwith "Meeting falls under a known repeated meeeting"
-                    false
+                    start2 > start1 && start2 < start1 + length1 || start2 + length2 > start1 && start2 < start1 + length1
             | Repeatedly(start1, length1, repetition1)->
-                // failwith "Unable to provide meeting"
-                false
-      
+                match m2.Schedule with
+                Once(start2, length2) ->
+                        // failwith "Meeting falls under a known meeting at that time"
+                    start2 > start1 && start2 < start1 + length1 || start2 + length2 > start1 && start2 < start1 + length1
+                | Repeatedly(start2, length2, repitition2) ->
+                    // failwith "Meeting falls under a known repeated meeeting"
+                    start2 > start1 && start2 < start1 + length1 || start2 + length2 > start1 && start2 < start1 + length1
+    ///<summary>
+    /// Meeting Conflict Starter 
+    /// </summary>
+    /// <returns>Checks for anything in the list that is </returns>
     let conflictAny meet meetList =
         List.exists (fun e -> conflict meet e) meetList
 
