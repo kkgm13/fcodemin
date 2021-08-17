@@ -20,6 +20,7 @@ type Storage () =
         // Check for multiple
         printf "%A" meet // %A = Any Fsharp Obj
         if Meeting.isValid meet then
+            // If meeting does NOT conflict with the list, then
             if not (Meeting.conflictAny meet (x.GetMeetings())) then
                 meetings.Add meet
                 Ok meet
@@ -41,7 +42,7 @@ let loadMeeting (meetId: string) next ctx = task {
     return! json meet next ctx
 }
 
-// Faking Data
+// Storage Faker Data
 storage.AddMeeting(Meeting.create "Event 1" (Once(DateTime(2022,03,16,15,0,0), TimeSpan.FromHours(1.0)))) |> ignore 
 storage.AddMeeting(Meeting.create "Event 2" (Once(DateTime(2021,10,29,15,0,0), TimeSpan.FromHours(1.0)))) |> ignore
 storage.AddMeeting(Meeting.create "Event 3" (Repeatedly(DateTime(2021,11,29,15,0,0), TimeSpan.FromHours(1.0) , TimeSpan.FromDays(7.0)))) |> ignore

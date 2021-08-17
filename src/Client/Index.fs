@@ -108,14 +108,14 @@ let update msg model =
     /// </summary>
     /// <returns>Meeting List</returns>
     | MeetingSaved (Ok meet) ->
-        { model with Meetings = model.Meetings @ [ meet ]; Errors = ["Meeting Saved"]}, Cmd.none
+        { model with Meetings = model.Meetings @ [ meet ]; Errors = ["Meeting Saved"]; TitleInput = "" ; StartInput = ""; DurationInput = 0; RepeatValInput = false; RepetitionInput = 0}, Cmd.none
         
     /// <summary>
     /// Confirm Meeting has been saved
     /// </summary>
     /// <returns>Meeting List</returns>
     | MeetingSaved (Error msg) ->
-        {model with Errors = [msg]}, Cmd.none
+        {model with Errors = [msg]; TitleInput = "" ; StartInput = ""; DurationInput = 0; RepeatValInput = false; RepetitionInput = 0}, Cmd.none
 
     /// <summary>
     /// Get the Selected Meeting from Storage (Possible todo: Get DB info)
@@ -270,7 +270,7 @@ let meetForm model dispatch =
                 input [ 
                     Class "form-check-input"
                     Type "checkbox"
-                    Value "" // Must not contain a value due to HTML structure
+                    // Value "" // Must not contain a value due to HTML structure
                     Id "flexCheckDefault" 
                     OnChange (fun e -> dispatch(SetRepeatValInput((e.target:?> Browser.Types.HTMLInputElement).``checked``))) //Warning will always be here "``_``"
                 ]

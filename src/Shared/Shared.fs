@@ -42,8 +42,13 @@ type Meeting =
         // Title Var is Empty
         if this.Title.Length = 0 then Some "No Meeting Title Provided."
         // Start var is between any Start var and subsequent durations
-        // else if this.Schedule.Start.Compare(DateTime.Now) > 0 
-        else None
+        else
+            match this.Schedule with 
+            | Once(start, duration) -> 
+                if start.CompareTo(DateTime.Now) < 0 then Some "This meeting can't happen ." else None
+            | Repeatedly(start, duration, repetition) -> 
+                if start.CompareTo(DateTime.Now) < 0 then Some "This meeting can't happen ." else None
+        // else None
 
 //////////////////////////////////
 /// Meeting Module for specific functions

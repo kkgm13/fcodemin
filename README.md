@@ -13,28 +13,29 @@ You'll need to install the following pre-requisites in order to build SAFE appli
 To Start the Server:
 ```bash
 cd src\Server\
-dotnet run     # Start up the Server with a localhost:8085 link
+dotnet run     # Start up the Server with localhost:8085 link
 ```
 
-To Start the client:
+To Start the Client:
 ```bash
 npm install    # To get Node-related dependencies
-npm run start
+npm run start 
+# Note: Do not refresh the page as it causes the system to revert back to default data
 ```
+Open a browser to `http://localhost:8080` to view the site.
 
 To Run the Client Tests
 ```bash
-npm test # A dedicated self-creataed test command via SAFE Stack Docs
+npm test # A dedicated self-creataed test command referencing SAFE Stack Docs
+# Open the webpage with localhost:8081 link
 ```
 
-To Run the Client Tests
+To Run the Server Tests
 ```bash
 #Assuming that it is on the project root folder
 dotnet run -p tests/Server #Dedicated dotNET test command
 # All results will be via Console
 ```
-
-Open a browser to `http://localhost:8080` to view the site.
 
 ## SAFE Stack Documentation
 If you want to know more about the full Azure Stack and all of its components (including Azure) visit the official [SAFE documentation](https://safe-stack.github.io/docs/).
