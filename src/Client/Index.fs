@@ -10,16 +10,17 @@ open System
 //////////////////////////////////////
 type Model =
     {
-        Hello: string
+        Hello: string           // Dummy Data
         Meetings: Meeting list  // List of Meetings
+
         // All HTML Input Tags MUST HAVE THEIR OWN DEDICATED Model
-        TitleInput: string       // Input Setter
-        StartInput: string       // Input Setter
-        DurationInput: int       // Input Setter
+        TitleInput: string          // Input Setter
+        StartInput: string          // Input Setter
+        DurationInput: int          // Input Setter
         RepeatValInput: Boolean     // Input Setter
-        RepetitionInput: int    // Input Setter
-        Errors: string list // Server Error Handler
-        TheMeeting: Meeting option
+        RepetitionInput: int        // Input Setter
+        Errors: string list         // Server Error Handler
+        TheMeeting: Meeting option  // Required for Passing Data to the Server
     }
 
 //////////////////////////////////////
@@ -31,17 +32,20 @@ type Msg =
     | LoadMeeting of Meeting            // Get Specified Meeting from Storage/DB
     | LoadMeetings of Meeting list      // Get Meetings from Storage/DB
     | MeetingLoaded of Meeting          // Loaded Meetings 
+
     // All HTML Input Tags MUST HAVE THEIR OWN DEDICATED MESSAGE
     | SetTitleInput of string            // HTML Title input
     | SetStartInput of string            // HTML DateTime input
     | SetDurationInput of int            // HTML Number input
-    | SetRepetitionInput of int            // HTML Number input
-    | SetRepeatValInput of Boolean            // HTML Number input
+    | SetRepetitionInput of int          // HTML Number input
+    | SetRepeatValInput of Boolean       // HTML Number input
+
     // Sending to Server
-    | SaveMeeting                   // Save Meeting
-    | MeetingSaved of Result<Meeting,string>           // Meeting Saved
+    | SaveMeeting                               // Save Meeting
+    | MeetingSaved of Result<Meeting,string>    // Meeting Saved
+
     // Error Collection
-    | GotError of exn               // Server Error Handler
+    | GotError of exn                   // Server Error Handler
 
 //////////////////////////////////////
 /// Default Model Initializations
@@ -61,9 +65,9 @@ let init() =
             TheMeeting = None       // Blank Meeting data?
         }
 
-    // Get actual data
+    // Fetch String based on Route Call
     let getHello() = Fetch.get<unit, string> Route.hello
-    // Get actual data, and fix it as a list to bypass JSON format
+    // Fetch actual Meeting data, and fix it as a list to bypass JSON format
     let loadMeetings() = Fetch.get<unit, Meeting list> Route.meeting
 
     // Induct Command Modules on load
@@ -76,12 +80,16 @@ let init() =
 // Client Dummy Test
 let sayHello s = "Hello " + s
 
-// Load a single Meeting
+/// <summary>
+/// Load a single Meeting
+/// </summary>
 let loadMeeting meetId =
     let loadMeeting () = Fetch.get<unit, Meeting> (sprintf "/api/meeting/%s" meetId)
     Cmd.OfPromise.perform loadMeeting () MeetingLoaded
 
-// Send user data to the Server
+/// <summary>
+/// Send user data to the Server to be saved
+/// </summary>
 let saveMeeting meet = 
     printf "%s" (meet.ToString())
     // Tell server a POST request is coming
@@ -89,36 +97,39 @@ let saveMeeting meet =
     // Create the promise function to save
     Cmd.OfPromise.either save meet MeetingSaved GotError
 
-//Updating the Model for the view
+//////////////////////////////////////
+/// Model View Updating sequences
+//////////////////////////////////////
 let update msg model =
+    // MUST ALWAYS MATCH WITH THE MESSAGE AS THE "Route/Controller connection"
     match msg with
     // Sample Hello
     | GotHello hello ->
         { model with Hello = hello }, Cmd.none
 
     /// <summary>
-    /// Get the Meetings from Storage (Possible todo: Get DB info)
+    /// Get the Meetings from Storage
     /// </summary>
     /// <returns>List of Meetings</returns>
     | LoadMeetings meet ->
         { model with Meetings = meet}, Cmd.none
 
     /// <summary>
-    /// Confirm Meeting has been saved
+    /// Confirm Meeting has been saved and is sent correctly
     /// </summary>
-    /// <returns>Meeting List</returns>
+    /// <returns>Meeting List with save message and resets form</returns>
     | MeetingSaved (Ok meet) ->
         { model with Meetings = model.Meetings @ [ meet ]; Errors = ["Meeting Saved"]; TitleInput = "" ; StartInput = ""; DurationInput = 0; RepeatValInput = false; RepetitionInput = 0}, Cmd.none
         
     /// <summary>
-    /// Confirm Meeting has been saved
+    /// Confirm Meeting has been saved but is recieved with an error
     /// </summary>
-    /// <returns>Meeting List</returns>
+    /// <returns>Meeting Error Message and resets form</returns>
     | MeetingSaved (Error msg) ->
         {model with Errors = [msg]; TitleInput = "" ; StartInput = ""; DurationInput = 0; RepeatValInput = false; RepetitionInput = 0}, Cmd.none
 
     /// <summary>
-    /// Get the Selected Meeting from Storage (Possible todo: Get DB info)
+    /// Get the Selected Meeting from Server Storage
     /// </summary>
     /// <returns>Selected Meeting</returns>
     | LoadMeeting meetId ->
@@ -126,14 +137,14 @@ let update msg model =
         model, loadMeeting id
 
     /// <summary>
-    /// Get the Meetings from Storage (Possible todo: Get DB info)
+    /// Get the Meetings from Server Storage
     /// </summary>
     /// <returns>List of Meetings</returns>
     | MeetingLoaded meet->
         { model with TheMeeting = Some meet }, Cmd.none
 
     /// <summary>
-    /// Set the Value for Title
+    /// Set the Value for Title to the Browser's Console
     /// </summary>
     /// <returns>HTML Input Value for Title</returns>
     | SetTitleInput value ->
@@ -141,42 +152,43 @@ let update msg model =
         { model with TitleInput = value}, Cmd.none
 
     /// <summary>
-    /// Print the Value for Start
+    /// Print the Value for Start to the Browser's Console
     /// </summary>
-    /// <returns>HTML Input Value for Title</returns>
+    /// <returns>HTML Input Value for Start</returns>
     | SetStartInput value ->
         printfn "Value for Input: %s" model.StartInput // Debug to the Browser Console
         { model with StartInput = value}, Cmd.none
 
     /// <summary>
-    /// Print the Value for Duration
+    /// Print the Value for Duration to the Browser's Console
     /// </summary>
-    /// <returns>HTML Input Value for Title</returns>
+    /// <returns>HTML Input Value for Duration</returns>
     | SetDurationInput value ->
         printfn "Value for Input: %s" (model.DurationInput.ToString()) // Debug to the Browser Console
         { model with DurationInput = value}, Cmd.none
 
     /// <summary>
-    /// Print the Value for Repeat Duration
+    /// Print the Value for Repeat Duration to the Browser's Console
     /// </summary>
-    /// <returns>HTML Input Value for Title</returns>
+    /// <returns>HTML Input Value for Repeating Input</returns>
     | SetRepetitionInput value ->
         printfn "Value for Input: %s" (model.RepetitionInput.ToString()) // Debug to the Browser Console
         { model with RepetitionInput = value}, Cmd.none
 
 
     /// <summary>
-    /// Print the Value for Duration
+    /// Print the Value for Repeating Duration to the Browser's Console
     /// </summary>
-    /// <returns>HTML Input Value for Title</returns>
+    /// <returns>HTML Input Value for Repeating Duration</returns>
     | SetRepeatValInput value ->
         printfn "Value for Input: %s" (model.RepeatValInput.ToString()) // Debug to the Browser Console
         { model with RepeatValInput = value}, Cmd.none
 
     /// <summary>
-    /// Save the Meeting
+    /// Save the Meeting MODEL to be sent to the Server
     /// </summary>
     | SaveMeeting ->
+        // This allows to take Repeated & Once Condition in Schedule correctly to set the right information
         let s = if model.RepeatValInput then 
                     Repeatedly(DateTime.Parse model.StartInput, TimeSpan.FromMinutes (float model.DurationInput), TimeSpan.FromDays (float model.RepetitionInput))
                 else 
@@ -193,7 +205,7 @@ let update msg model =
         { model with Errors = ex.Message :: model.Errors }, Cmd.none
 
 /////////////////////////////////////////////////////
-/// Set up the React Portion of HTML
+/// Set up the React Portion of HTML View
 ///////////////////////////////////////////////////// 
 open Fable.React
 open Fable.React.Props
@@ -216,7 +228,6 @@ let topSection model =
 let meetList model =
     // Meeting List Variation Section
     div [Class "col-8"] [
-        /// 
         // Error List (will come out blank, but present an empty array)
         p [Style [TextAlign TextAlignOptions.Center; FontWeight "bold"]] [ 
             for err in model.Errors do // Split the array or go in the array
@@ -237,7 +248,6 @@ let meetList model =
                             li [] [ str ("Repeated every " + (repetition.TotalDays.ToString())+" day(s)")] 
                             li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ]  
                             li [] [ str (duration.TotalMinutes.ToString()+" Minutes")] 
-                        // li [] [ str (meet.Id.ToString())]
                 ]
         ]
     ]

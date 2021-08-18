@@ -82,8 +82,10 @@ module Meeting =
     /// </summary>
     /// <returns>True for any conflicts; else false</returns>
     let conflict m1 m2 = 
+        // First Meeting's Schedules
         match m1.Schedule with 
             | Once(start1, length1)->
+                // Match with the 2nd Meeting's Schedule
                 match m2.Schedule with
                 Once(start2, length2) ->
                         // failwith "Meeting falls under a known meeting at that time"
@@ -93,6 +95,7 @@ module Meeting =
                     // failwith "Meeting falls under a known repeated meeeting"
                     start2 > start1 && start2 < start1 + length1 || start2 + length2 > start1 && start2 < start1 + length1
             | Repeatedly(start1, length1, repetition1)->
+            // Match with the 2nd Meeting's Schedule
                 match m2.Schedule with
                 Once(start2, length2) ->
                         // failwith "Meeting falls under a known meeting at that time"
@@ -100,21 +103,22 @@ module Meeting =
                 | Repeatedly(start2, length2, repitition2) ->
                     // failwith "Meeting falls under a known repeated meeeting"
                     start2 > start1 && start2 < start1 + length1 || start2 + length2 > start1 && start2 < start1 + length1
+
     ///<summary>
     /// Meeting Conflict Starter 
     /// </summary>
     /// <returns>Checks for anything in the list that is </returns>
     let conflictAny meet meetList =
+        // Check for any existing in the list
         List.exists (fun e -> conflict meet e) meetList
 
 //////////////////////////////////
 ///  Routes for Server
 //////////////////////////////////
 module Route =
-    let hello = "/api/hello"
-    let meeting = "/api/meetings"
-    let hellos = "/api/hellos"
-    // let meetSelect = "/api/meetings/"
+    let hello = "/api/hello"            // Hello URL
+    let meeting = "/api/meetings"       // Main Meeting URL
+    let hellos = "/api/hellos"          // Hello URL for Testing
 
 //////////////////////////////////
 /// Provide Data passing between the Client ot Server

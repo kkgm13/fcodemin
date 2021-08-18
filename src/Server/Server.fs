@@ -8,7 +8,9 @@ open FSharp.Control.Tasks
 
 open Shared
 
+///////////////////////////////////
 // Storage Type for Fake Data
+///////////////////////////////////
 type Storage () =
     // Storage Array
     let meetings = ResizeArray<Meeting>()
@@ -16,21 +18,23 @@ type Storage () =
     member __.GetMeetings () =
         List.ofSeq meetings
     // Meeting Add (equiv of CRUD create/store)
+    // Note: x was used to allow the use of member usages 
     member x.AddMeeting (meet : Meeting) =
         // Check for multiple
         printf "%A" meet // %A = Any Fsharp Obj
         if Meeting.isValid meet then
             // If meeting does NOT conflict with the list, then
             if not (Meeting.conflictAny meet (x.GetMeetings())) then
+                // Add the Meeting in
                 meetings.Add meet
                 Ok meet
             else Error "Meeting Conflicted"
         else Error "Invalid Meeting"
 
-// Storage Template
+// Storage Variable
 let storage = Storage()
 
-// Issue with loading single Meeting
+// Single Meeting Loading (Not in use but was good practice)
 let loadMeeting (meetId: string) next ctx = task {
     let meet = {
             Id = Guid.Parse(meetId)
@@ -61,20 +65,24 @@ let saveMeeting next (ctx: HttpContext) = task { // Explicit Call to HttpContext
     let x = storage.AddMeeting(Meeting.create meeting.Title meeting.Schedule)
     return! Successful.OK x next ctx
 }
+// Get message Method (For Sample Testing)
 let getMessage () = "Hello from SAFE!"     
 
+/// HTTP Route 
 let webApp =
     router {
         // pipe_through headerPipe
         // not_found_handler (text "404") // Not Hound Handler
-        get Route.hellos (getMessage () |> json )
-        get Route.hello (json "Hello World")
+        get Route.hellos (getMessage () |> json )           // Get Message for Testing
+        get Route.hello (json "Hello World")                // Hello World Sample View
         get Route.meeting (json (storage.GetMeetings()))    // Index Callout
-        getf "/api/meeting/%s" loadMeeting              // Show? Callout?
-        post "/api/meeting-sent" saveMeeting                      // Create Callout
+        getf "/api/meeting/%s" loadMeeting                  // Show? Callout?
+        post "/api/meeting-sent" saveMeeting                // Create Callout
     }
 
-
+///////////////////////////////////
+/// Main Application Server Setup
+///////////////////////////////////
 let app =
     application {
         url "http://0.0.0.0:8085"
@@ -85,4 +93,4 @@ let app =
         use_gzip
     }
 
-run app
+run app // REQUIRED TO RUN EVERYTHING
