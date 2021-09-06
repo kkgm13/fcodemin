@@ -222,6 +222,8 @@ let topSection model =
         h2 [] [ str model.Hello ]
     ]
 
+let meetOccur (start:DateTime, repetition:TimeSpan) =  seq { for i in 0 .. Int32.MaxValue do yield start.AddMinutes (repetition.TotalMinutes * (float) i) }|> Seq.skipWhile (fun n -> n < DateTime.Now)|> Seq.truncate 10
+
 ///////////////////////////////////
 /// MEETING LIST COMPONENT VIEW FUNCTION
 ///////////////////////////////////
@@ -244,10 +246,16 @@ let meetList model =
                             li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ] 
                             li [] [ str (duration.TotalMinutes .ToString()+" Minutes") ] 
                         | Repeatedly(start, duration, repetition) -> 
-                        // seq { for i in 0 .. Int32.MaxValue do yield i * 7 }|> Seq.skipWhile (fun n -> n < 1000)|> Seq.take 10
                             li [] [ str ("Repeated every " + (repetition.TotalDays.ToString())+" day(s)")] 
-                            li [] [ str (start.ToLongDateString()+" @ "+start.TimeOfDay.ToString()) ]  
-                            li [] [ str (duration.TotalMinutes.ToString()+" Minutes")] 
+                            div [Style [ CSSProp.Overflow OverflowOptions.Auto ; Width 250; Height 100]] [
+                                for occurence in meetOccur (start, repetition) do
+                                    hr []
+                                    li [] [str (occurence.ToLongDateString()+" @ "+ occurence.TimeOfDay.ToString())]
+                                    li [] [ str (duration.TotalMinutes.ToString()+" Minutes")]
+                            ]
+                            
+
+                                 
                 ]
         ]
     ]
@@ -280,7 +288,7 @@ let meetForm model dispatch =
                 input [ 
                     Class "form-check-input"
                     Type "checkbox"
-                    // Value "" // Must not contain a value due to HTML structure
+                    // Value "" //  Must not contain a value due to HTML structure
                     Id "flexCheckDefault" 
                     OnChange (fun e -> dispatch(SetRepeatValInput((e.target:?> Browser.Types.HTMLInputElement).``checked``))) //Warning will always be here "``_``"
                 ]

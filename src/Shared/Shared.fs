@@ -89,7 +89,6 @@ module Meeting =
                 match m2.Schedule with
                 Once(start2, length2) ->
                         // failwith "Meeting falls under a known meeting at that time"
-                        // start2 starts after start1 & start2 starts before start1 and its length
                     start2 > start1 && start2 < start1 + length1 || start2 + length2 > start1 && start2 < start1 + length1
                 | Repeatedly(start2, length2, repitition2) ->
                     // failwith "Meeting falls under a known repeated meeeting"
@@ -112,7 +111,7 @@ module Meeting =
         // Check for any existing in the list
         List.exists (fun e -> conflict meet e) meetList
 
-//////////////////////////////////
+////////////////////////////////// 
 ///  Routes for Server
 //////////////////////////////////
 module Route =
